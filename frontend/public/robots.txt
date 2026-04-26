@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://TU_FRONTEND_PUBLICO/sitemap.xml
