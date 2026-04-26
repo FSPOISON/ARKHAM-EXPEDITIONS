@@ -1,0 +1,26 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import usuariosRouter from "./routes/usuarios.routes";
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.get("/health", (_req, res) => {
+  res.json({ ok: true, service: "arkham-backend" });
+});
+
+app.use("/api/usuarios", usuariosRouter);
+
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error(err);
+  res.status(500).json({ message: "Error interno del servidor" });
+});
+
+const port = Number(process.env.PORT) || 3000;
+app.listen(port, () => {
+  console.log(`API corriendo en http://localhost:${port}`);
+});

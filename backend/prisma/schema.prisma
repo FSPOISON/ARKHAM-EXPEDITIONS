@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tbl_calificaciones_expedicion {
+  id_calificacion  BigInt            @id @default(autoincrement())
+  id_usuario       BigInt?
+  id_expedicion    BigInt?
+  puntuacion       Int?              @db.SmallInt
+  comentario       String?           @db.Text
+  creado_en        DateTime?         @db.Timestamp(0)
+  tbl_usuarios     tbl_usuarios?     @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "tbl_calificaciones_expedicion_ibfk_1")
+  tbl_expediciones tbl_expediciones? @relation(fields: [id_expedicion], references: [id_expedicion], onDelete: NoAction, onUpdate: NoAction, map: "tbl_calificaciones_expedicion_ibfk_2")
+
+  @@unique([id_usuario, id_expedicion], map: "tbl_calificaciones_expedicion_index_2")
+  @@index([id_expedicion], map: "id_expedicion")
+}
+
+model tbl_categoria_estado {
+  id_categoria Int          @id @default(autoincrement()) @db.TinyInt
+  nombre       String?      @db.VarChar(50)
+  tbl_estado   tbl_estado[]
+}
+
+model tbl_ciudades {
+  id_ciudad      Int           @id @default(autoincrement())
+  nombre         String        @db.VarChar(120)
+  id_pais        Int?          @db.SmallInt
+  latitud        Decimal?      @db.Decimal(9, 6)
+  longitud       Decimal?      @db.Decimal(9, 6)
+  creado_en      DateTime?     @db.Timestamp(0)
+  actualizado_en DateTime?     @db.Timestamp(0)
+  tbl_paises     tbl_paises?   @relation(fields: [id_pais], references: [id_pais], onDelete: NoAction, onUpdate: NoAction, map: "tbl_ciudades_ibfk_1")
+  tbl_lugares    tbl_lugares[]
+
+  @@index([id_pais], map: "id_pais")
+}
+
+model tbl_estado {
+  id_estado            Int                   @id @default(autoincrement()) @db.SmallInt
+  id_categoria         Int?                  @db.TinyInt
+  nombre               String?               @db.VarChar(50)
+  tbl_categoria_estado tbl_categoria_estado? @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "tbl_estado_ibfk_1")
+  tbl_expediciones     tbl_expediciones[]
+  tbl_participaciones  tbl_participaciones[]
+  tbl_usuarios         tbl_usuarios[]
+
+  @@unique([id_categoria, nombre], map: "tbl_estado_index_0")
+}
+
+model tbl_estado_acceso {
+  id_estado_acceso Int           @id @default(autoincrement()) @db.TinyInt
+  nombre           String?       @db.VarChar(50)
+  tbl_lugares      tbl_lugares[]
+}
+
+model tbl_estado_pago {
+  id_estado_pago Int         @id @default(autoincrement()) @db.TinyInt
+  nombre         String?     @db.VarChar(30)
+  tbl_pagos      tbl_pagos[]
+}
+
+model tbl_evidencias {
+  id_evidencia     BigInt            @id @default(autoincrement())
+  id_usuario       BigInt?
+  id_expedicion    BigInt?
+  tipo             String?           @db.VarChar(20)
+  url_archivo      String?           @db.VarChar(255)
+  descripcion      String?           @db.Text
+  subido_en        DateTime?         @db.Timestamp(0)
+  tbl_usuarios     tbl_usuarios?     @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "tbl_evidencias_ibfk_1")
+  tbl_expediciones tbl_expediciones? @relation(fields: [id_expedicion], references: [id_expedicion], onDelete: NoAction, onUpdate: NoAction, map: "tbl_evidencias_ibfk_2")
+
+  @@index([id_expedicion], map: "id_expedicion")
+  @@index([id_usuario], map: "id_usuario")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tbl_expediciones {
+  id_expedicion                 BigInt                          @id @default(autoincrement())
+  titulo                        String?                         @db.VarChar(150)
+  descripcion                   String?                         @db.Text
+  id_lugar                      Int?
+  id_organizador                BigInt?
+  fecha_inicio                  DateTime?                       @db.Timestamp(0)
+  fecha_fin                     DateTime?                       @db.Timestamp(0)
+  capacidad_maxima              Int?
+  nivel_dificultad              Int?                            @db.SmallInt
+  requiere_pasaporte            Boolean?
+  requiere_visa                 Boolean?
+  precio_base                   Decimal?                        @db.Decimal(10, 2)
+  id_estado                     Int?                            @db.SmallInt
+  creado_en                     DateTime?                       @db.Timestamp(0)
+  actualizado_en                DateTime?                       @db.Timestamp(0)
+  tbl_calificaciones_expedicion tbl_calificaciones_expedicion[]
+  tbl_evidencias                tbl_evidencias[]
+  tbl_lugares                   tbl_lugares?                    @relation(fields: [id_lugar], references: [id_lugar], onDelete: NoAction, onUpdate: NoAction, map: "tbl_expediciones_ibfk_1")
+  tbl_usuarios                  tbl_usuarios?                   @relation(fields: [id_organizador], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "tbl_expediciones_ibfk_2")
+  tbl_estado                    tbl_estado?                     @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "tbl_expediciones_ibfk_3")
+  tbl_pagos                     tbl_pagos[]
+  tbl_participaciones           tbl_participaciones[]
+
+  @@index([id_estado], map: "id_estado")
+  @@index([id_lugar], map: "id_lugar")
+  @@index([id_organizador], map: "id_organizador")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tbl_lugares {
+  id_lugar          Int                @id @default(autoincrement())
+  nombre            String?            @db.VarChar(150)
+  id_tipo_lugar     Int?               @db.SmallInt
+  id_ciudad         Int?
+  direccion         String?            @db.VarChar(200)
+  latitud           Decimal?           @db.Decimal(9, 6)
+  longitud          Decimal?           @db.Decimal(9, 6)
+  nivel_peligro     Int?               @db.SmallInt
+  id_estado_acceso  Int?               @db.TinyInt
+  descripcion       String?            @db.Text
+  fuente_datos      String?            @db.VarChar(150)
+  creado_en         DateTime?          @db.Timestamp(0)
+  actualizado_en    DateTime?          @db.Timestamp(0)
+  tbl_expediciones  tbl_expediciones[]
+  tbl_tipos_lugar   tbl_tipos_lugar?   @relation(fields: [id_tipo_lugar], references: [id_tipo_lugar], onDelete: NoAction, onUpdate: NoAction, map: "tbl_lugares_ibfk_1")
+  tbl_ciudades      tbl_ciudades?      @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: NoAction, onUpdate: NoAction, map: "tbl_lugares_ibfk_2")
+  tbl_estado_acceso tbl_estado_acceso? @relation(fields: [id_estado_acceso], references: [id_estado_acceso], onDelete: NoAction, onUpdate: NoAction, map: "tbl_lugares_ibfk_3")
+
+  @@index([id_ciudad], map: "id_ciudad")
+  @@index([id_estado_acceso], map: "id_estado_acceso")
+  @@index([id_tipo_lugar], map: "id_tipo_lugar")
+}
+
+model tbl_metodos_pago {
+  id_metodo_pago Int         @id @default(autoincrement()) @db.TinyInt
+  nombre         String?     @db.VarChar(50)
+  tbl_pagos      tbl_pagos[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tbl_pago_detalle {
+  id_detalle BigInt     @id @default(autoincrement())
+  id_pago    BigInt?
+  tipo_item  String?    @db.VarChar(30)
+  id_item    BigInt?
+  precio     Decimal?   @db.Decimal(10, 2)
+  cantidad   Int?
+  subtotal   Decimal?   @db.Decimal(10, 2)
+  tbl_pagos  tbl_pagos? @relation(fields: [id_pago], references: [id_pago], onDelete: NoAction, onUpdate: NoAction, map: "tbl_pago_detalle_ibfk_1")
+
+  @@index([id_pago], map: "id_pago")
+}
+
+model tbl_pagos {
+  id_pago            BigInt             @id @default(autoincrement())
+  id_usuario         BigInt?
+  id_expedicion      BigInt?
+  monto_total        Decimal?           @db.Decimal(10, 2)
+  moneda             String?            @db.Char(3)
+  id_metodo_pago     Int?               @db.TinyInt
+  id_estado_pago     Int?               @db.TinyInt
+  referencia_externa String?            @db.VarChar(150)
+  pagado_en          DateTime?          @db.Timestamp(0)
+  creado_en          DateTime?          @db.Timestamp(0)
+  actualizado_en     DateTime?          @db.Timestamp(0)
+  tbl_pago_detalle   tbl_pago_detalle[]
+  tbl_usuarios       tbl_usuarios?      @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "tbl_pagos_ibfk_1")
+  tbl_expediciones   tbl_expediciones?  @relation(fields: [id_expedicion], references: [id_expedicion], onDelete: NoAction, onUpdate: NoAction, map: "tbl_pagos_ibfk_2")
+  tbl_metodos_pago   tbl_metodos_pago?  @relation(fields: [id_metodo_pago], references: [id_metodo_pago], onDelete: NoAction, onUpdate: NoAction, map: "tbl_pagos_ibfk_3")
+  tbl_estado_pago    tbl_estado_pago?   @relation(fields: [id_estado_pago], references: [id_estado_pago], onDelete: NoAction, onUpdate: NoAction, map: "tbl_pagos_ibfk_4")
+
+  @@index([id_estado_pago], map: "id_estado_pago")
+  @@index([id_expedicion], map: "id_expedicion")
+  @@index([id_metodo_pago], map: "id_metodo_pago")
+  @@index([id_usuario], map: "id_usuario")
+}
+
+model tbl_paises {
+  id_pais      Int            @id @default(autoincrement()) @db.SmallInt
+  nombre       String         @db.VarChar(120)
+  codigo_iso2  String         @unique(map: "codigo_iso2") @db.Char(2)
+  codigo_iso3  String         @unique(map: "codigo_iso3") @db.Char(3)
+  tbl_ciudades tbl_ciudades[]
+  tbl_usuarios tbl_usuarios[]
+}
+
+model tbl_participaciones {
+  id_participacion BigInt            @id @default(autoincrement())
+  id_usuario       BigInt?
+  id_expedicion    BigInt?
+  id_rol           Int?              @db.TinyInt
+  id_estado        Int?              @db.SmallInt
+  unido_en         DateTime?         @db.Timestamp(0)
+  tbl_usuarios     tbl_usuarios?     @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "tbl_participaciones_ibfk_1")
+  tbl_expediciones tbl_expediciones? @relation(fields: [id_expedicion], references: [id_expedicion], onDelete: NoAction, onUpdate: NoAction, map: "tbl_participaciones_ibfk_2")
+  tbl_roles        tbl_roles?        @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "tbl_participaciones_ibfk_3")
+  tbl_estado       tbl_estado?       @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "tbl_participaciones_ibfk_4")
+
+  @@unique([id_usuario, id_expedicion], map: "tbl_participaciones_index_1")
+  @@index([id_estado], map: "id_estado")
+  @@index([id_expedicion], map: "id_expedicion")
+  @@index([id_rol], map: "id_rol")
+}
+
+model tbl_roles {
+  id_rol              Int                   @id @default(autoincrement()) @db.TinyInt
+  nombre              String?               @db.VarChar(50)
+  tbl_participaciones tbl_participaciones[]
+}
+
+model tbl_tipos_lugar {
+  id_tipo_lugar Int           @id @default(autoincrement()) @db.SmallInt
+  nombre        String?       @db.VarChar(100)
+  tbl_lugares   tbl_lugares[]
+}
+
+model tbl_usuarios {
+  id_usuario                    BigInt                          @id @default(autoincrement())
+  nombre                        String?                         @db.VarChar(100)
+  apellido                      String?                         @db.VarChar(100)
+  email                         String?                         @unique(map: "email") @db.VarChar(150)
+  telefono                      String?                         @db.VarChar(20)
+  fecha_nacimiento              DateTime?                       @db.Date
+  id_pais_residencia            Int?                            @db.SmallInt
+  reputacion                    Int?                            @default(0)
+  nivel_explorador              Int?                            @default(1)
+  id_estado                     Int?                            @db.SmallInt
+  creado_en                     DateTime?                       @db.Timestamp(0)
+  actualizado_en                DateTime?                       @db.Timestamp(0)
+  tbl_calificaciones_expedicion tbl_calificaciones_expedicion[]
+  tbl_evidencias                tbl_evidencias[]
+  tbl_expediciones              tbl_expediciones[]
+  tbl_pagos                     tbl_pagos[]
+  tbl_participaciones           tbl_participaciones[]
+  tbl_paises                    tbl_paises?                     @relation(fields: [id_pais_residencia], references: [id_pais], onDelete: NoAction, onUpdate: NoAction, map: "tbl_usuarios_ibfk_1")
+  tbl_estado                    tbl_estado?                     @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "tbl_usuarios_ibfk_2")
+
+  @@index([id_estado], map: "id_estado")
+  @@index([id_pais_residencia], map: "id_pais_residencia")
+}
