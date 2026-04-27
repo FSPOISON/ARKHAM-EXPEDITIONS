@@ -2,6 +2,7 @@ import { useState } from "react";
 import Usuarios from "./components/Usuarios";
 import Lugares from "./components/Lugares";
 import Expediciones from "./components/Expediciones";
+import "./App.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
