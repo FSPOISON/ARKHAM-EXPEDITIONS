@@ -16,8 +16,11 @@ app.get("/health", (_req, res) => {
 app.use("/api/usuarios", usuariosRouter);
 
 app.use((err: any, _req: any, res: any, _next: any) => {
-  console.error(err);
-  res.status(500).json({ message: "Error interno del servidor" });
+  console.error("Error capturado en el backend:", err);
+  res.status(500).json({ 
+    message: err.message || "Error interno del servidor",
+    stack: err.stack
+  });
 });
 
 const port = Number(process.env.PORT) || 3000;
