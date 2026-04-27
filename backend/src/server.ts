@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import usuariosRouter from "./routes/usuarios.routes";
+import expedicionesRouter from "./routes/expediciones.routes";
+import lugaresRouter from "./routes/lugares.routes";
 
 dotenv.config();
 
@@ -14,6 +16,8 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/usuarios", usuariosRouter);
+app.use("/api/expediciones", expedicionesRouter);
+app.use("/api/lugares", lugaresRouter);
 
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error("Error capturado en el backend:", err);
