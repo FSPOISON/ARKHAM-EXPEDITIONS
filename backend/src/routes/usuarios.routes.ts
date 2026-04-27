@@ -45,7 +45,7 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  const { nombre, apellido, email } = req.body;
+  const { nombre, apellido, email, telefono } = req.body;
   if (!nombre || !apellido || !email) {
     return res.status(400).json({ message: "nombre, apellido y email son obligatorios" });
   }
@@ -56,6 +56,7 @@ router.post("/", async (req, res, next) => {
         nombre,
         apellido,
         email,
+        telefono: telefono || null,
         creado_en: new Date(),
         actualizado_en: new Date()
       }
