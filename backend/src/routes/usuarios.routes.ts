@@ -29,6 +29,52 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
+router.post("/oauth-login", async (req, res, next) => {
+  const { email, nombre, apellido, provider, provider_id, avatar_url } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "El correo electrónico es requerido." });
+  }
+
+  try {
+    let usuario = await prisma.tbl_usuarios.findUnique({
+      where: { email }
+    });
+
+    if (usuario) {
+      usuario = await prisma.tbl_usuarios.update({
+        where: { email },
+        data: {
+          nombre: usuario.nombre || nombre || null,
+          apellido: usuario.apellido || apellido || null,
+          provider: usuario.provider || provider || null,
+          provider_id: usuario.provider_id || provider_id || null,
+          avatar_url: usuario.avatar_url || avatar_url || null,
+          actualizado_en: new Date()
+        }
+      });
+    } else {
+      usuario = await prisma.tbl_usuarios.create({
+        data: {
+          email,
+          nombre: nombre || "Investigador",
+          apellido: apellido || "Anónimo",
+          provider: provider || null,
+          provider_id: provider_id || null,
+          avatar_url: avatar_url || null,
+          reputacion: 0,
+          nivel_explorador: 1,
+          creado_en: new Date(),
+          actualizado_en: new Date()
+        }
+      });
+    }
+
+    res.json(serialize(usuario));
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   const id = toId(req.params.id);
   if (!id) return res.status(400).json({ message: "ID invalido" });
@@ -90,6 +136,9 @@ router.put("/:id", async (req, res, next) => {
   if (req.body.reputacion !== undefined) data.reputacion = req.body.reputacion;
   if (req.body.nivel_explorador !== undefined) data.nivel_explorador = req.body.nivel_explorador;
   if (req.body.id_estado !== undefined) data.id_estado = req.body.id_estado;
+  if (req.body.provider !== undefined) data.provider = req.body.provider;
+  if (req.body.provider_id !== undefined) data.provider_id = req.body.provider_id;
+  if (req.body.avatar_url !== undefined) data.avatar_url = req.body.avatar_url;
 
   try {
     const actualizado = await prisma.tbl_usuarios.update({

@@ -231,6 +231,9 @@ model tbl_usuarios {
   id_estado                     Int?                            @db.SmallInt
   creado_en                     DateTime?                       @db.Timestamp(0)
   actualizado_en                DateTime?                       @db.Timestamp(0)
+  provider                      String?                         @db.VarChar(50)
+  provider_id                   String?                         @db.VarChar(255)
+  avatar_url                    String?                         @db.VarChar(500)
   tbl_calificaciones_expedicion tbl_calificaciones_expedicion[]
   tbl_evidencias                tbl_evidencias[]
   tbl_expediciones              tbl_expediciones[]
