@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import Usuarios from "./components/Usuarios";
 import Lugares from "./components/Lugares";
 import Expediciones from "./components/Expediciones";
@@ -12,6 +13,12 @@ function App() {
   const [tab, setTab] = useState("usuarios");
   const [user, setUser] = useState(null);
   const [soundActive, setSoundActive] = useState(isSoundEnabled());
+  const [metrics, setMetrics] = useState({
+    investigatorsCount: 0,
+    locationsCount: 0,
+    expeditionsCount: 0,
+    avgHazard: 0
+  });
 
   useEffect(() => {
     const savedUser = localStorage.getItem("arkham_investigator");
@@ -23,6 +30,38 @@ function App() {
       }
     }
   }, []);
+
+  const loadMetrics = async () => {
+    try {
+      const [uRes, lRes, eRes] = await Promise.all([
+        axios.get(`${API_BASE}/api/usuarios`),
+        axios.get(`${API_BASE}/api/lugares`),
+        axios.get(`${API_BASE}/api/expediciones`)
+      ]);
+      const uData = Array.isArray(uRes.data) ? uRes.data : [];
+      const lData = Array.isArray(lRes.data) ? lRes.data : [];
+      const eData = Array.isArray(eRes.data) ? eRes.data : [];
+      
+      const avg = lData.length > 0 
+        ? lData.reduce((acc, curr) => acc + (Number(curr.nivel_peligro) || 0), 0) / lData.length 
+        : 0;
+
+      setMetrics({
+        investigatorsCount: uData.length,
+        locationsCount: lData.length,
+        expeditionsCount: eData.length,
+        avgHazard: avg
+      });
+    } catch (err) {
+      console.error("Error al cargar métricas", err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      loadMetrics();
+    }
+  }, [user, tab]);
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
@@ -143,9 +182,60 @@ function App() {
 
       <main className="main-content fade-in">
         <div className="fog-overlay"></div>
-        {tab === "usuarios" && <Usuarios apiBase={API_BASE} />}
-        {tab === "lugares" && <Lugares apiBase={API_BASE} />}
-        {tab === "expediciones" && <Expediciones apiBase={API_BASE} />}
+
+        {/* Cabecera del Dashboard Profesional */}
+        <header className="dashboard-header animate-slide-right">
+          <div className="header-title-area">
+            <h2>Centro de Control de Investigaciones</h2>
+            <p className="welcome-text">Agente activo: <strong>{user.nombre} {user.apellido}</strong> — Monitoreando portales y expediciones.</p>
+          </div>
+
+          <div className="metrics-grid">
+            <div className="metric-card" onMouseEnter={playHover}>
+              <div className="metric-card-inner">
+                <span className="metric-icon">👥</span>
+                <div className="metric-text-group">
+                  <div className="metric-val">{metrics.investigatorsCount}</div>
+                  <div className="metric-label">Investigadores</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="metric-card" onMouseEnter={playHover}>
+              <div className="metric-card-inner">
+                <span className="metric-icon">👁️</span>
+                <div className="metric-text-group">
+                  <div className="metric-val">{metrics.locationsCount}</div>
+                  <div className="metric-label">Lugares Malditos</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="metric-card" onMouseEnter={playHover}>
+              <div className="metric-card-inner">
+                <span className="metric-icon">🗺️</span>
+                <div className="metric-text-group">
+                  <div className="metric-val">{metrics.expeditionsCount}</div>
+                  <div className="metric-label">Expediciones</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="metric-card" onMouseEnter={playHover}>
+              <div className="metric-card-inner">
+                <span className="metric-icon">⚠️</span>
+                <div className="metric-text-group">
+                  <div className="metric-val">{metrics.avgHazard.toFixed(1)}</div>
+                  <div className="metric-label">Riesgo Promedio</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {tab === "usuarios" && <Usuarios apiBase={API_BASE} onDataChange={loadMetrics} />}
+        {tab === "lugares" && <Lugares apiBase={API_BASE} onDataChange={loadMetrics} />}
+        {tab === "expediciones" && <Expediciones apiBase={API_BASE} onDataChange={loadMetrics} />}
       </main>
     </div>
   );

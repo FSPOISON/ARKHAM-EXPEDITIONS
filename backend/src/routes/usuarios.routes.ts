@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
+import crypto from "crypto";
 
 const router = Router();
 
@@ -11,12 +12,21 @@ const toId = (value: string): bigint | null => {
   }
 };
 
-const serialize = (payload: unknown) =>
-  JSON.parse(
+const serialize = (payload: any) => {
+  const clean = JSON.parse(
     JSON.stringify(payload, (_key, value) =>
       typeof value === "bigint" ? value.toString() : value
     )
   );
+  if (clean && typeof clean === "object") {
+    if (Array.isArray(clean)) {
+      clean.forEach(u => { if (u) delete u.contrasena; });
+    } else {
+      delete clean.contrasena;
+    }
+  }
+  return clean;
+};
 
 router.get("/", async (_req, res, next) => {
   try {
@@ -67,6 +77,73 @@ router.post("/oauth-login", async (req, res, next) => {
           actualizado_en: new Date()
         }
       });
+    }
+
+    res.json(serialize(usuario));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/registrar", async (req, res, next) => {
+  const { nombre, apellido, email, contrasena, telefono } = req.body;
+  if (!nombre || !apellido || !email || !contrasena) {
+    return res.status(400).json({ message: "Nombre, apellido, email y contraseña son requeridos." });
+  }
+
+  try {
+    const existe = await prisma.tbl_usuarios.findUnique({
+      where: { email }
+    });
+    if (existe) {
+      return res.status(409).json({ message: "El correo electrónico ya está registrado." });
+    }
+
+    const hashed = crypto.createHash("sha256").update(contrasena).digest("hex");
+    const avatarNum = Math.floor(Math.random() * 70);
+
+    const nuevo = await prisma.tbl_usuarios.create({
+      data: {
+        nombre,
+        apellido,
+        email,
+        contrasena: hashed,
+        telefono: telefono || null,
+        avatar_url: `https://i.pravatar.cc/150?img=${avatarNum}`,
+        reputacion: 0,
+        nivel_explorador: 1,
+        creado_en: new Date(),
+        actualizado_en: new Date()
+      }
+    });
+
+    res.status(201).json(serialize(nuevo));
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return res.status(409).json({ message: "El correo electrónico ya está registrado." });
+    }
+    next(error);
+  }
+});
+
+router.post("/login", async (req, res, next) => {
+  const { email, contrasena } = req.body;
+  if (!email || !contrasena) {
+    return res.status(400).json({ message: "Email y contraseña son obligatorios." });
+  }
+
+  try {
+    const usuario = await prisma.tbl_usuarios.findUnique({
+      where: { email }
+    });
+
+    if (!usuario || !usuario.contrasena) {
+      return res.status(401).json({ message: "Credenciales incorrectas o inexistentes." });
+    }
+
+    const hashed = crypto.createHash("sha256").update(contrasena).digest("hex");
+    if (usuario.contrasena !== hashed) {
+      return res.status(401).json({ message: "Credenciales incorrectas o inexistentes." });
     }
 
     res.json(serialize(usuario));
