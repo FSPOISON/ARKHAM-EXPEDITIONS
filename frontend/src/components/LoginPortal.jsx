@@ -136,7 +136,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
         contrasena: loginPassword
       });
       playSuccess();
-      localStorage.setItem("arkham_investigator", JSON.stringify(response.data));
+      sessionStorage.setItem("arkham_investigator", JSON.stringify(response.data));
       onLoginSuccess(response.data);
     } catch (err) {
       playFailure();
@@ -167,7 +167,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
       playSuccess();
       setMensaje("¡Cuenta creada con éxito! Iniciando sesión…");
       setTimeout(() => {
-        localStorage.setItem("arkham_investigator", JSON.stringify(response.data));
+        sessionStorage.setItem("arkham_investigator", JSON.stringify(response.data));
         onLoginSuccess(response.data);
       }, 1500);
     } catch (err) {
@@ -191,7 +191,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
         avatar_url: userInfo.avatar_url
       });
       playSuccess();
-      localStorage.setItem("arkham_investigator", JSON.stringify(response.data));
+      sessionStorage.setItem("arkham_investigator", JSON.stringify(response.data));
       onLoginSuccess(response.data);
     } catch (err) {
       playFailure();

@@ -1676,3 +1676,292 @@ tr:hover td {
 .google-svg { width: 20px; height: 20px; }
 .real-google-btn-container { display: flex; justify-content: center; width: 100%; }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — New Profile Card & Footer
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Sidebar profile card ───────────────────────────────────────────────── */
+.sidebar-profile-card {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.sidebar-profile-card:hover {
+  background: rgba(16, 185, 129, 0.09);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+}
+
+.sidebar-profile-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sidebar-profile-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  display: block;
+}
+
+.sidebar-profile-online {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #1e293b;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.sidebar-profile-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar-profile-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0 0.15rem;
+  line-height: 1.2;
+}
+
+.sidebar-profile-role {
+  font-size: 0.72rem;
+  color: var(--accent-primary);
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.3px;
+}
+
+.sidebar-profile-stats {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ── Sidebar footer ─────────────────────────────────────────────────────── */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ── Sound toggle button ────────────────────────────────────────────────── */
+.sidebar-sound-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.6rem 0.875rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.sidebar-sound-btn:hover {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: var(--text-main);
+}
+
+.sidebar-sound-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Logout button ──────────────────────────────────────────────────────── */
+.sidebar-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1.5px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #f87171;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  letter-spacing: 0.3px;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.sidebar-logout-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Server row ─────────────────────────────────────────────────────────── */
+.sidebar-server-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+
+.sidebar-server-row small {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ── Sidebar separator (existing .separator class) ───────────────────────── */
+.separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
+  margin-top: 0.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DASHBOARD HEADER — polished metrics
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.header-title-area {
+  margin-bottom: 1.5rem;
+}
+
+.header-title-area h2 {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.5px;
+}
+
+.welcome-text {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.welcome-text strong {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  border-radius: 14px;
+  padding: 1.25rem 1rem;
+  transition: all 0.25s ease;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(16,185,129,0.04) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.metric-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+  transform: translateY(-2px);
+}
+
+.metric-card:hover::before {
+  opacity: 1;
+}
+
+.metric-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  position: relative;
+  z-index: 1;
+}
+
+.metric-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.metric-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.metric-val {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* ── Vignette overlay for the main app ──────────────────────────────────── */
+.vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Fade-in animation for main content ──────────────────────────────────── */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}

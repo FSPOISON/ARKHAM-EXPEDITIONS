@@ -21,12 +21,14 @@ function App() {
   });
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("arkham_investigator");
+    // sessionStorage clears when the browser tab/window is closed,
+    // ensuring the login screen always shows on a fresh visit.
+    const savedUser = sessionStorage.getItem("arkham_investigator");
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        localStorage.removeItem("arkham_investigator");
+        sessionStorage.removeItem("arkham_investigator");
       }
     }
   }, []);
@@ -69,8 +71,9 @@ function App() {
 
   const handleLogout = () => {
     playClick();
-    localStorage.removeItem("arkham_investigator");
+    sessionStorage.removeItem("arkham_investigator");
     setUser(null);
+    setTab("usuarios"); // reset tab on logout
   };
 
   const handleTabChange = (newTab) => {
@@ -143,40 +146,61 @@ function App() {
           </button>
         </nav>
 
-        {/* Investigador Activo Panel */}
-        <div className="active-investigator-card">
-          <div className="investigator-avatar-wrap">
-            <img src={user.avatar_url} alt={user.nombre} className="investigator-avatar" />
-            <span className="online-indicator"></span>
+        {/* ── Perfil del investigador activo ── */}
+        <div className="sidebar-profile-card">
+          <div className="sidebar-profile-avatar-wrap">
+            <img
+              src={user.avatar_url || `https://i.pravatar.cc/80?u=${user.email}`}
+              alt={user.nombre}
+              className="sidebar-profile-avatar"
+              onError={(e) => { e.target.src = `https://i.pravatar.cc/80?u=${user.email}`; }}
+            />
+            <span className="sidebar-profile-online" title="En línea" />
           </div>
-          <div className="investigator-details">
-            <p className="investigator-name">{user.nombre} {user.apellido}</p>
-            <p className="investigator-meta">Rango: {user.nivel_explorador === 1 ? "Novicio" : "Explorador"}</p>
-            <div className="investigator-stats">
-              <span title="Reputación">⭐ {user.reputacion || 0}</span>
-              <span title="Nivel">Lv. {user.nivel_explorador || 1}</span>
+          <div className="sidebar-profile-info">
+            <p className="sidebar-profile-name">{user.nombre} {user.apellido}</p>
+            <p className="sidebar-profile-role">
+              {user.nivel_explorador === 1 ? "🔰 Novicio" : "⚔️ Explorador"}
+            </p>
+            <div className="sidebar-profile-stats">
+              <span>⭐ {user.reputacion || 0}</span>
+              <span>Lv.{user.nivel_explorador || 1}</span>
             </div>
           </div>
         </div>
-        
-        <div className="status-footer">
-          <div className="sound-control-row">
-            <button 
-              className="sound-sidebar-btn" 
-              onClick={handleToggleSound} 
-              title={soundActive ? "Silenciar audio espectral" : "Activar audio espectral"}
-            >
-              {soundActive ? "🔊 Sonido Activo" : "🔇 Sonido Silenciado"}
-            </button>
-          </div>
-          <button className="logout-btn" onClick={handleLogout} onMouseEnter={playHover}>
-            🚪 Cerrar Portal
+
+        <div className="sidebar-footer">
+          {/* Sound toggle */}
+          <button
+            className="sidebar-sound-btn"
+            onClick={handleToggleSound}
+            onMouseEnter={playHover}
+            title={soundActive ? "Silenciar" : "Activar sonido"}
+          >
+            <span className="sidebar-sound-icon">{soundActive ? "🔊" : "🔇"}</span>
+            <span>{soundActive ? "Sonido activo" : "Silenciado"}</span>
           </button>
-          <div className="server-status">
-            <span className="dot pulse-green"></span>
-            <small>Portal Sincronizado</small>
+
+          {/* Logout / Switch account */}
+          <button
+            id="btn-cerrar-sesion"
+            className="sidebar-logout-btn"
+            onClick={handleLogout}
+            onMouseEnter={playHover}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Cerrar sesión
+          </button>
+
+          {/* Server indicator */}
+          <div className="sidebar-server-row">
+            <span className="dot pulse-green" />
+            <small>Conectado</small>
           </div>
-          <small className="host-url">{API_BASE}</small>
         </div>
       </aside>
 
