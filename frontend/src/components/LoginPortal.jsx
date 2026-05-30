@@ -87,7 +87,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
         client_id: googleClientId,
         callback: (res) => {
           if (!res?.credential) {
-            setError("Google no entregó una credencial válida.");
+            setError("No fue posible completar el acceso con Google. Inténtalo nuevamente.");
             return;
           }
           executeOAuthLogin(
@@ -236,11 +236,11 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
     playClick();
     clearMessages();
     if (!googleClientId) {
-      setError("Falta VITE_GOOGLE_CLIENT_ID en el frontend.");
+      setError("El acceso con Google no está disponible en este momento.");
       return;
     }
     if (!window.google?.accounts?.id) {
-      setError("Google todavía se está cargando. Intenta de nuevo en unos segundos.");
+      setError("Estamos preparando el acceso con Google. Inténtalo de nuevo en unos segundos.");
       return;
     }
     window.google.accounts.id.prompt((notification) => {
@@ -254,11 +254,11 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
     playClick();
     clearMessages();
     if (!facebookAppId) {
-      setError("Falta VITE_FACEBOOK_APP_ID en el frontend.");
+      setError("El acceso con Facebook no está disponible en este momento.");
       return;
     }
     if (!facebookReady || !window.FB) {
-      setError("Facebook todavía se está cargando. Intenta de nuevo en unos segundos.");
+      setError("Estamos preparando el acceso con Facebook. Inténtalo de nuevo en unos segundos.");
       return;
     }
 
@@ -430,7 +430,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
                     alt=""
                     className="lp-oauth-logo"
                   />
-                  <span>{googleClientId ? "Cargando Google..." : "Google no configurado"}</span>
+                  <span>Google</span>
                 </button>
               )}
 
@@ -444,7 +444,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
                 <svg className="lp-oauth-logo" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
                   <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
                 </svg>
-                <span>{facebookAppId ? "Continuar con Facebook" : "Facebook no configurado"}</span>
+                <span>Facebook</span>
               </button>
             </div>
 
