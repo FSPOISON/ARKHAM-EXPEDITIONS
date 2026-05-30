@@ -8,7 +8,27 @@ import lugaresRouter from "./routes/lugares.routes";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || "").split(",")
+]
+  .filter(Boolean)
+  .map((origin) => origin!.trim().replace(/\/$/, ""));
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    const normalized = origin.replace(/\/$/, "");
+    const isAllowed =
+      configuredOrigins.includes(normalized) ||
+      /^https:\/\/[a-z0-9-]+(-git-[a-z0-9-]+)?-[a-z0-9-]+\.vercel\.app$/i.test(normalized) ||
+      /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(normalized);
+
+    if (isAllowed) return callback(null, true);
+    return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+  }
+}));
 app.use(express.json());
 
 app.get("/health", (_req, res) => {

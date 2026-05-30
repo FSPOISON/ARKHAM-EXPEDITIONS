@@ -28,6 +28,103 @@ const serialize = (payload: any) => {
   return clean;
 };
 
+type OAuthProfile = {
+  email: string;
+  nombre: string;
+  apellido: string;
+  provider: "google" | "facebook";
+  provider_id: string;
+  avatar_url?: string | null;
+};
+
+const splitName = (fullName?: string | null) => {
+  const parts = (fullName || "").trim().split(/\s+/).filter(Boolean);
+  return {
+    nombre: parts[0] || "Investigador",
+    apellido: parts.slice(1).join(" ") || "Anónimo"
+  };
+};
+
+const verifyGoogleToken = async (idToken: string): Promise<OAuthProfile> => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    const error: any = new Error("Google OAuth no está configurado en el backend.");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const response = await fetch(
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`
+  );
+  if (!response.ok) {
+    const error: any = new Error("La sesión de Google no pudo verificarse.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const payload: any = await response.json();
+  if (payload.aud !== clientId || payload.email_verified !== "true" || !payload.email || !payload.sub) {
+    const error: any = new Error("La cuenta de Google no es válida para esta aplicación.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const fallback = splitName(payload.name);
+  return {
+    email: payload.email,
+    nombre: payload.given_name || fallback.nombre,
+    apellido: payload.family_name || fallback.apellido,
+    provider: "google",
+    provider_id: payload.sub,
+    avatar_url: payload.picture || null
+  };
+};
+
+const verifyFacebookToken = async (accessToken: string): Promise<OAuthProfile> => {
+  const appId = process.env.FACEBOOK_APP_ID;
+  const appSecret = process.env.FACEBOOK_APP_SECRET;
+  if (!appId || !appSecret) {
+    const error: any = new Error("Facebook OAuth no está configurado en el backend.");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const appAccessToken = `${appId}|${appSecret}`;
+  const debugResponse = await fetch(
+    `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(accessToken)}&access_token=${encodeURIComponent(appAccessToken)}`
+  );
+  const debugPayload: any = await debugResponse.json();
+  if (
+    !debugResponse.ok ||
+    !debugPayload?.data?.is_valid ||
+    String(debugPayload.data.app_id) !== String(appId)
+  ) {
+    const error: any = new Error("La sesión de Facebook no pudo verificarse.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const profileResponse = await fetch(
+    `https://graph.facebook.com/me?fields=id,first_name,last_name,name,email,picture.width(240).height(240)&access_token=${encodeURIComponent(accessToken)}`
+  );
+  const profile: any = await profileResponse.json();
+  if (!profileResponse.ok || !profile.id || !profile.email) {
+    const error: any = new Error("Facebook no entregó un correo verificable para esta cuenta.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const fallback = splitName(profile.name);
+  return {
+    email: profile.email,
+    nombre: profile.first_name || fallback.nombre,
+    apellido: profile.last_name || fallback.apellido,
+    provider: "facebook",
+    provider_id: profile.id,
+    avatar_url: profile.picture?.data?.url || null
+  };
+};
+
 router.get("/", async (_req, res, next) => {
   try {
     const usuarios = await prisma.tbl_usuarios.findMany({
@@ -40,37 +137,48 @@ router.get("/", async (_req, res, next) => {
 });
 
 router.post("/oauth-login", async (req, res, next) => {
-  const { email, nombre, apellido, provider, provider_id, avatar_url } = req.body;
-  if (!email) {
-    return res.status(400).json({ message: "El correo electrónico es requerido." });
+  const { provider, id_token, access_token } = req.body;
+  if (!provider) {
+    return res.status(400).json({ message: "El proveedor OAuth es requerido." });
   }
 
   try {
+    let profile: OAuthProfile;
+    if (provider === "google") {
+      if (!id_token) return res.status(400).json({ message: "Falta el token de Google." });
+      profile = await verifyGoogleToken(id_token);
+    } else if (provider === "facebook") {
+      if (!access_token) return res.status(400).json({ message: "Falta el token de Facebook." });
+      profile = await verifyFacebookToken(access_token);
+    } else {
+      return res.status(400).json({ message: "Proveedor OAuth no soportado." });
+    }
+
     let usuario = await prisma.tbl_usuarios.findUnique({
-      where: { email }
+      where: { email: profile.email }
     });
 
     if (usuario) {
       usuario = await prisma.tbl_usuarios.update({
-        where: { email },
+        where: { email: profile.email },
         data: {
-          nombre: usuario.nombre || nombre || null,
-          apellido: usuario.apellido || apellido || null,
-          provider: usuario.provider || provider || null,
-          provider_id: usuario.provider_id || provider_id || null,
-          avatar_url: usuario.avatar_url || avatar_url || null,
+          nombre: usuario.nombre || profile.nombre,
+          apellido: usuario.apellido || profile.apellido,
+          provider: profile.provider,
+          provider_id: profile.provider_id,
+          avatar_url: profile.avatar_url || usuario.avatar_url || null,
           actualizado_en: new Date()
         }
       });
     } else {
       usuario = await prisma.tbl_usuarios.create({
         data: {
-          email,
-          nombre: nombre || "Investigador",
-          apellido: apellido || "Anónimo",
-          provider: provider || null,
-          provider_id: provider_id || null,
-          avatar_url: avatar_url || null,
+          email: profile.email,
+          nombre: profile.nombre,
+          apellido: profile.apellido,
+          provider: profile.provider,
+          provider_id: profile.provider_id,
+          avatar_url: profile.avatar_url || null,
           reputacion: 0,
           nivel_explorador: 1,
           creado_en: new Date(),
@@ -80,7 +188,10 @@ router.post("/oauth-login", async (req, res, next) => {
     }
 
     res.json(serialize(usuario));
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     next(error);
   }
 });

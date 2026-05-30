@@ -18,6 +18,21 @@ const serialize = (payload: unknown) =>
     )
   );
 
+const toNullableFloat = (value: unknown) =>
+  value === undefined || value === null || value === "" ? null : Number(value);
+
+const toNullableInt = (value: unknown) =>
+  value === undefined || value === null || value === "" ? null : parseInt(String(value), 10);
+
+const toNullableDate = (value: unknown) =>
+  value === undefined || value === null || value === "" ? null : new Date(`${value}T00:00:00.000Z`);
+
+const toNullableBoolean = (value: unknown) => {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value === "boolean") return value;
+  return ["true", "1", "si", "sí", "yes"].includes(String(value).toLowerCase());
+};
+
 router.get("/", async (_req, res, next) => {
   try {
     const expediciones = await prisma.tbl_expediciones.findMany({
@@ -47,7 +62,18 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  const { titulo, descripcion, precio_base, nivel_dificultad, id_lugar } = req.body;
+  const {
+    titulo,
+    descripcion,
+    precio_base,
+    nivel_dificultad,
+    id_lugar,
+    fecha_inicio,
+    fecha_fin,
+    capacidad_maxima,
+    requiere_pasaporte,
+    requiere_visa
+  } = req.body;
   if (!titulo) {
     return res.status(400).json({ message: "El titulo es obligatorio" });
   }
@@ -57,9 +83,14 @@ router.post("/", async (req, res, next) => {
       data: {
         titulo,
         descripcion: descripcion || null,
-        precio_base: precio_base ? parseFloat(precio_base) : null,
-        nivel_dificultad: nivel_dificultad ? parseInt(nivel_dificultad, 10) : null,
-        id_lugar: id_lugar ? parseInt(id_lugar, 10) : null,
+        precio_base: toNullableFloat(precio_base),
+        nivel_dificultad: toNullableInt(nivel_dificultad),
+        id_lugar: toNullableInt(id_lugar),
+        fecha_inicio: toNullableDate(fecha_inicio),
+        fecha_fin: toNullableDate(fecha_fin),
+        capacidad_maxima: toNullableInt(capacidad_maxima),
+        requiere_pasaporte: toNullableBoolean(requiere_pasaporte),
+        requiere_visa: toNullableBoolean(requiere_visa),
         creado_en: new Date(),
         actualizado_en: new Date()
       }
@@ -77,9 +108,14 @@ router.put("/:id", async (req, res, next) => {
   const data: any = { actualizado_en: new Date() };
   if (req.body.titulo !== undefined) data.titulo = req.body.titulo;
   if (req.body.descripcion !== undefined) data.descripcion = req.body.descripcion;
-  if (req.body.precio_base !== undefined) data.precio_base = req.body.precio_base ? parseFloat(req.body.precio_base) : null;
-  if (req.body.nivel_dificultad !== undefined) data.nivel_dificultad = req.body.nivel_dificultad ? parseInt(req.body.nivel_dificultad, 10) : null;
-  if (req.body.id_lugar !== undefined) data.id_lugar = req.body.id_lugar ? parseInt(req.body.id_lugar, 10) : null;
+  if (req.body.precio_base !== undefined) data.precio_base = toNullableFloat(req.body.precio_base);
+  if (req.body.nivel_dificultad !== undefined) data.nivel_dificultad = toNullableInt(req.body.nivel_dificultad);
+  if (req.body.id_lugar !== undefined) data.id_lugar = toNullableInt(req.body.id_lugar);
+  if (req.body.fecha_inicio !== undefined) data.fecha_inicio = toNullableDate(req.body.fecha_inicio);
+  if (req.body.fecha_fin !== undefined) data.fecha_fin = toNullableDate(req.body.fecha_fin);
+  if (req.body.capacidad_maxima !== undefined) data.capacidad_maxima = toNullableInt(req.body.capacidad_maxima);
+  if (req.body.requiere_pasaporte !== undefined) data.requiere_pasaporte = toNullableBoolean(req.body.requiere_pasaporte);
+  if (req.body.requiere_visa !== undefined) data.requiere_visa = toNullableBoolean(req.body.requiere_visa);
 
   try {
     const actualizado = await prisma.tbl_expediciones.update({

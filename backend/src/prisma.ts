@@ -8,6 +8,8 @@ if (!databaseUrl) {
 }
 
 const url = new URL(databaseUrl);
+const sslMode = url.searchParams.get("ssl-mode") || url.searchParams.get("sslmode");
+const requiresSsl = Boolean(sslMode && sslMode.toLowerCase() !== "disabled");
 
 const adapter = new PrismaMariaDb({
   host: url.hostname,
@@ -15,6 +17,7 @@ const adapter = new PrismaMariaDb({
   user: decodeURIComponent(url.username),
   password: decodeURIComponent(url.password),
   database: url.pathname.replace(/^\//, ""),
+  ssl: requiresSsl ? { rejectUnauthorized: true } : undefined,
   connectionLimit: 5
 });
 

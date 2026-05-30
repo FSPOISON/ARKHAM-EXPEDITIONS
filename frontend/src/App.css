@@ -1369,12 +1369,18 @@ tr:hover td {
 }
 
 /* ── OAuth row ──────────────────────────────────────────────────────────── */
-.lp-oauth-row {
+.lp-oauth-row,
+.lp-oauth-stack {
   display: flex;
   gap: 0.75rem;
 }
 
+.lp-oauth-stack {
+  flex-direction: column;
+}
+
 .lp-oauth-btn {
+  width: 100%;
   flex: 1;
   display: flex;
   align-items: center;
@@ -1424,6 +1430,16 @@ tr:hover td {
   display: flex;
   justify-content: center;
   width: 100%;
+  min-height: 44px;
+}
+
+.lp-real-google > div,
+.lp-real-google iframe {
+  width: 100% !important;
+}
+
+.lp-real-google.ready {
+  margin-bottom: 0.05rem;
 }
 
 /* ── Footer text & links ────────────────────────────────────────────────── */
@@ -1628,6 +1644,16 @@ tr:hover td {
   z-index: 2000;
 }
 
+.lp-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .lp-loading-ring {
   width: 48px;
   height: 48px;
@@ -1675,6 +1701,394 @@ tr:hover td {
 }
 .google-svg { width: 20px; height: 20px; }
 .real-google-btn-container { display: flex; justify-content: center; width: 100%; }
+
+/* Expedition planning suite */
+.expedition-suite {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.expedition-command-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.expedition-stat,
+.service-card,
+.expedition-card {
+  background: rgba(15, 23, 42, 0.62);
+  border: 1px solid rgba(51, 65, 85, 0.78);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+
+.expedition-stat {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.expedition-stat-label {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.expedition-stat strong {
+  color: var(--text-main);
+  font-size: 1.45rem;
+}
+
+.expedition-stat small {
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.expedition-stat.danger strong {
+  color: #fca5a5;
+}
+
+.expedition-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.55fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.expedition-form {
+  margin: 0;
+}
+
+.form-section-title {
+  margin-bottom: 0.75rem;
+}
+
+.form-section-title h3 {
+  margin: 0 0 0.25rem;
+}
+
+.form-section-title p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.travel-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.switch-row {
+  min-height: 48px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.switch-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-primary);
+}
+
+.service-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.service-preview > div {
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.14);
+}
+
+.service-preview strong {
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.service-preview p {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-top: 0.35rem;
+}
+
+.expedition-services {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service-card {
+  padding: 1rem;
+}
+
+.service-card span {
+  color: var(--accent-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.service-card strong {
+  display: block;
+  margin: 0.45rem 0 0.35rem;
+  color: var(--text-main);
+}
+
+.service-card p {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.expedition-board {
+  margin-top: 0;
+}
+
+.expedition-toolbar {
+  gap: 0.75rem;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.filter-pills button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.filter-pills button.active,
+.filter-pills button:hover {
+  color: var(--accent-primary);
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.expedition-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.expedition-empty {
+  grid-column: 1 / -1;
+  padding: 2rem;
+}
+
+.expedition-card {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.expedition-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.route-code {
+  color: var(--accent-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.expedition-card h3 {
+  margin: 0.25rem 0;
+  color: var(--text-main);
+  font-size: 1.08rem;
+}
+
+.expedition-card-head p,
+.expedition-description {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.readiness-badge {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.24);
+}
+
+.readiness-badge.medium {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.26);
+}
+
+.readiness-badge.critical {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.26);
+}
+
+.itinerary-strip,
+.expedition-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.itinerary-strip > div,
+.expedition-meta-grid span,
+.readiness-list > div {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem;
+}
+
+.itinerary-strip small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  margin-bottom: 0.25rem;
+}
+
+.itinerary-strip strong {
+  color: var(--text-main);
+  font-size: 0.86rem;
+}
+
+.expedition-meta-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.expedition-meta-grid span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.expedition-meta-grid strong {
+  color: var(--text-main);
+}
+
+.document-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.document-pills span {
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.document-pills span.required {
+  background: rgba(16, 185, 129, 0.11);
+  color: #6ee7b7;
+}
+
+.readiness-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.readiness-list > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.readiness-list span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.readiness-list strong {
+  color: var(--text-main);
+  font-size: 0.82rem;
+  text-transform: capitalize;
+}
+
+@media (max-width: 560px) {
+  .lp-bg {
+    align-items: flex-start;
+    padding: 4.5rem 1rem 1rem;
+    overflow-y: auto;
+  }
+
+  .lp-card {
+    max-width: 100%;
+    padding: 2rem 1.25rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .lp-card::before {
+    border-radius: 20px;
+  }
+
+  .lp-title {
+    font-size: 2rem;
+    letter-spacing: 3px;
+  }
+
+  .lp-form-row {
+    flex-direction: column;
+  }
+
+  .lp-oauth-row {
+    flex-direction: column;
+  }
+
+  .lp-sound-btn {
+    top: 0.9rem;
+    right: 0.9rem;
+  }
+
+  .expedition-command-grid,
+  .expedition-layout,
+  .travel-requirements,
+  .service-preview,
+  .itinerary-strip,
+  .expedition-meta-grid,
+  .readiness-list {
+    grid-template-columns: 1fr;
+  }
+
+  .expedition-toolbar {
+    align-items: stretch;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SIDEBAR — New Profile Card & Footer
