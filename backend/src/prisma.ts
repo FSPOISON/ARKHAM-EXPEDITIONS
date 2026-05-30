@@ -17,8 +17,11 @@ const adapter = new PrismaMariaDb({
   user: decodeURIComponent(url.username),
   password: decodeURIComponent(url.password),
   database: url.pathname.replace(/^\//, ""),
-  ssl: requiresSsl ? { rejectUnauthorized: true } : undefined,
-  connectionLimit: 5
+  ssl: requiresSsl ? { rejectUnauthorized: false } : undefined,
+  connectionLimit: Number(process.env.DB_CONNECTION_LIMIT || "3"),
+  acquireTimeout: Number(process.env.DB_ACQUIRE_TIMEOUT || "30000"),
+  connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || "20000"),
+  idleTimeout: Number(process.env.DB_IDLE_TIMEOUT || "60")
 });
 
 export const prisma = new PrismaClient({ adapter });

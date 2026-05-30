@@ -41,9 +41,18 @@ app.use("/api/lugares", lugaresRouter);
 
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error("Error capturado en el backend:", err);
+  const isDatabaseTimeout =
+    String(err?.message || "").toLowerCase().includes("pool timeout") ||
+    String(err?.message || "").toLowerCase().includes("failed to retrieve a connection");
+
+  if (isDatabaseTimeout) {
+    return res.status(503).json({
+      message: "No se pudo conectar con la base de datos. Intenta nuevamente en unos segundos."
+    });
+  }
+
   res.status(500).json({ 
-    message: err.message || "Error interno del servidor",
-    stack: err.stack
+    message: err.message || "Error interno del servidor"
   });
 });
 

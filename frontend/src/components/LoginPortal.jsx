@@ -10,7 +10,6 @@ import {
 } from "../utils/audioHelper";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID || "";
 
 const getErrorMessage = (err, fallback) =>
   err?.response?.data?.message || err?.message || fallback;
@@ -25,7 +24,6 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
   const [showPass, setShowPass] = useState(false);
   const [showRegPass, setShowRegPass] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
-  const [facebookReady, setFacebookReady] = useState(false);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -139,37 +137,6 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
     });
   }, [googleReady]);
 
-  useEffect(() => {
-    if (!facebookAppId) return;
-
-    window.fbAsyncInit = () => {
-      window.FB.init({
-        appId: facebookAppId,
-        cookie: true,
-        xfbml: false,
-        version: "v19.0"
-      });
-      setFacebookReady(true);
-    };
-
-    if (window.FB) {
-      window.fbAsyncInit();
-      return;
-    }
-
-    const scriptId = "facebook-jssdk";
-    if (document.getElementById(scriptId)) return;
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.async = true;
-    script.defer = true;
-    script.crossOrigin = "anonymous";
-    script.src = "https://connect.facebook.net/es_LA/sdk.js";
-    script.onerror = () => setError("No se pudo cargar el inicio de sesión de Facebook.");
-    document.body.appendChild(script);
-  }, []);
-
   const switchView = (nextView) => {
     playClick();
     clearMessages();
@@ -248,42 +215,6 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
         setMensaje("Selecciona el botón oficial de Google para continuar.");
       }
     });
-  };
-
-  const handleFacebookClick = () => {
-    playClick();
-    clearMessages();
-    if (!facebookAppId) {
-      setError("El acceso con Facebook no está disponible en este momento.");
-      return;
-    }
-    if (!facebookReady || !window.FB) {
-      setError("Estamos preparando el acceso con Facebook. Inténtalo de nuevo en unos segundos.");
-      return;
-    }
-
-    setOauthLoading("Facebook");
-    window.FB.login(
-      (response) => {
-        if (response?.authResponse?.accessToken) {
-          executeOAuthLogin(
-            {
-              provider: "facebook",
-              access_token: response.authResponse.accessToken
-            },
-            "Facebook"
-          );
-          return;
-        }
-        setOauthLoading("");
-        setError("Inicio de sesión con Facebook cancelado.");
-      },
-      {
-        scope: "public_profile,email",
-        return_scopes: true,
-        auth_type: "rerequest"
-      }
-    );
   };
 
   const isBusy = cargando || Boolean(oauthLoading);
@@ -433,19 +364,6 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
                   <span>Google</span>
                 </button>
               )}
-
-              <button
-                type="button"
-                className="lp-oauth-btn lp-oauth-btn--facebook"
-                onClick={handleFacebookClick}
-                onMouseEnter={playHover}
-                disabled={isBusy}
-              >
-                <svg className="lp-oauth-logo" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
-                  <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
-                </svg>
-                <span>Facebook</span>
-              </button>
             </div>
 
             <p className="lp-footer-text">
