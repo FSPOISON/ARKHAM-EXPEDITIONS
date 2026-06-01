@@ -3,6 +3,17 @@ import axios from "axios";
 import { playClick, playHover } from "../utils/audioHelper";
 
 const emptyForm = { nombre: "", apellido: "", email: "", telefono: "" };
+const creatureStyles = ["wendigo", "deep-one", "night-gaunt", "shoggoth"];
+
+const getCreatureProfile = (user) => {
+  const seed = encodeURIComponent(`${user.id_usuario}-${user.email || user.nombre || "arkham"}`);
+  const variant = creatureStyles[Number(user.id_usuario || 0) % creatureStyles.length];
+
+  return {
+    variant,
+    avatar: user.avatar_url || `https://robohash.org/${seed}.png?set=set2&size=160x160`,
+  };
+};
 
 export default function Usuarios({ apiBase, onDataChange }) {
   const API_URL = `${apiBase}/api/usuarios`;
@@ -88,7 +99,7 @@ export default function Usuarios({ apiBase, onDataChange }) {
   };
 
   return (
-    <div className="crud-container fade-in-scale">
+    <div className="crud-container users-crud fade-in-scale">
       <div className="crud-header">
         <h2>Registro de Investigadores</h2>
         <p className="subtitle">
@@ -99,7 +110,8 @@ export default function Usuarios({ apiBase, onDataChange }) {
       <div className="crud-grid">
         {/* Left Column: Form Card */}
         <div className="form-card-column animate-slide-right">
-          <div className="form-panel">
+          <div className="form-panel investigator-form-panel">
+            <div className="panel-kicker">Expediente confidencial</div>
             <h3>{editId ? "Modificar Expediente" : "Reclutar Investigador"}</h3>
             <p className="form-desc-text">Completa los datos del nuevo miembro del club.</p>
             <form onSubmit={guardar}>
@@ -140,7 +152,7 @@ export default function Usuarios({ apiBase, onDataChange }) {
                 />
               </div>
 
-              <div className="actions">
+              <div className="actions user-form-actions">
                 <button
                   type="submit"
                   className="btn-primary"
@@ -169,10 +181,10 @@ export default function Usuarios({ apiBase, onDataChange }) {
 
         {/* Right Column: Table Card */}
         <div className="table-card-column">
-          <div className="table-panel">
+          <div className="table-panel investigators-panel">
             <div className="toolbar">
               <div className="search-wrapper">
-                <span className="search-icon">🔍</span>
+                <span className="search-icon" aria-hidden="true">⌕</span>
                 <input
                   className="search-bar"
                   value={busqueda}
@@ -189,6 +201,7 @@ export default function Usuarios({ apiBase, onDataChange }) {
                 }}
                 onMouseEnter={playHover}
               >
+                <span aria-hidden="true">↻</span>
                 Sincronizar
               </button>
             </div>
@@ -215,18 +228,21 @@ export default function Usuarios({ apiBase, onDataChange }) {
                       </td>
                     </tr>
                   ) : (
-                    usuariosFiltrados.map((u) => (
+                    usuariosFiltrados.map((u) => {
+                      const creature = getCreatureProfile(u);
+
+                      return (
                       <tr key={u.id_usuario} className="table-row-animate">
                         <td>
                           <div className="user-profile-cell">
-                            <img
-                              src={
-                                u.avatar_url ||
-                                `https://i.pravatar.cc/150?img=${Number(u.id_usuario) % 70}`
-                              }
-                              alt="avatar"
-                              className="table-user-avatar"
-                            />
+                            <span className={`avatar-frame avatar-frame--${creature.variant}`}>
+                              <img
+                                src={creature.avatar}
+                                alt={`Retrato de ${u.nombre} ${u.apellido}`}
+                                className="table-user-avatar"
+                                loading="lazy"
+                              />
+                            </span>
                             <div className="user-profile-cell-details">
                               <span className="user-fullname">
                                 {u.nombre} {u.apellido}
@@ -237,12 +253,12 @@ export default function Usuarios({ apiBase, onDataChange }) {
                             </div>
                           </div>
                         </td>
-                        <td>{u.email}</td>
-                        <td>{u.telefono || "Sin registrar"}</td>
+                        <td className="muted-cell">{u.email}</td>
+                        <td className="muted-cell">{u.telefono || "Sin registrar"}</td>
                         <td className="row-actions">
                           <button
                             type="button"
-                            className="btn-secondary"
+                            className="btn-secondary action-btn"
                             onClick={() => {
                               playClick();
                               setEditId(u.id_usuario);
@@ -254,7 +270,7 @@ export default function Usuarios({ apiBase, onDataChange }) {
                           </button>
                           <button
                             type="button"
-                            className="btn-danger"
+                            className="btn-danger action-btn"
                             onClick={() => eliminar(u.id_usuario)}
                             onMouseEnter={playHover}
                           >
@@ -262,7 +278,8 @@ export default function Usuarios({ apiBase, onDataChange }) {
                           </button>
                         </td>
                       </tr>
-                    ))
+                      );
+                    })
                   )}
                 </tbody>
               </table>

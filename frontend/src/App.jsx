@@ -9,6 +9,11 @@ import "./App.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
+const monsterAvatar = (user) => {
+  const seed = encodeURIComponent(user?.email || `${user?.nombre || "arkham"}-${user?.apellido || "agent"}`);
+  return `https://robohash.org/${seed}.png?set=set2&size=120x120`;
+};
+
 function App() {
   const [tab, setTab] = useState("usuarios");
   const [user, setUser] = useState(null);
@@ -150,10 +155,10 @@ function App() {
         <div className="sidebar-profile-card">
           <div className="sidebar-profile-avatar-wrap">
             <img
-              src={user.avatar_url || `https://i.pravatar.cc/80?u=${user.email}`}
+              src={user.avatar_url || monsterAvatar(user)}
               alt={user.nombre}
               className="sidebar-profile-avatar"
-              onError={(e) => { e.target.src = `https://i.pravatar.cc/80?u=${user.email}`; }}
+              onError={(e) => { e.target.src = monsterAvatar(user); }}
             />
             <span className="sidebar-profile-online" title="En línea" />
           </div>
@@ -266,4 +271,3 @@ function App() {
 }
 
 export default App;
-
