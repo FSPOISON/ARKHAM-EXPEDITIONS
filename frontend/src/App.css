@@ -1711,7 +1711,7 @@ tr:hover td {
 
 .expedition-command-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
 }
 
@@ -1751,6 +1751,10 @@ tr:hover td {
 
 .expedition-stat.danger strong {
   color: #fca5a5;
+}
+
+.expedition-stat.payment-stat strong {
+  color: #93c5fd;
 }
 
 .expedition-layout {
@@ -2017,6 +2021,11 @@ tr:hover td {
   color: #6ee7b7;
 }
 
+.document-pills span.paid {
+  background: rgba(59, 130, 246, 0.12);
+  color: #bfdbfe;
+}
+
 .readiness-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2038,6 +2047,580 @@ tr:hover td {
   color: var(--text-main);
   font-size: 0.82rem;
   text-transform: capitalize;
+}
+
+/* Location intelligence archive */
+.locations-crud {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.locations-crud .crud-header .subtitle {
+  margin-bottom: 0;
+}
+
+.intel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.intel-card,
+.operations-preview > div {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(7, 12, 24, 0.94));
+  border: 1px solid rgba(71, 85, 105, 0.72);
+  border-radius: 10px;
+  padding: 0.95rem;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26);
+}
+
+.intel-card span,
+.operations-preview span {
+  color: #9fb0c6;
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.32rem;
+  text-transform: uppercase;
+}
+
+.intel-card strong,
+.operations-preview strong {
+  color: #f8fafc;
+  display: block;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.intel-card small {
+  color: var(--text-muted);
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 0.32rem;
+}
+
+.intel-card.danger strong {
+  color: #fca5a5;
+}
+
+.locations-crud .crud-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.78fr) minmax(560px, 1.42fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.location-form-panel,
+.locations-panel,
+.expedition-form,
+.expedition-board,
+.expedition-stat,
+.service-card,
+.expedition-card {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(14, 165, 233, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(8, 13, 24, 0.96));
+  border-color: rgba(71, 85, 105, 0.74);
+  border-radius: 12px;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.location-form-panel {
+  padding: 1.35rem;
+  position: sticky;
+  top: 0;
+}
+
+.locations-crud input,
+.locations-crud textarea,
+.expedition-suite input,
+.expedition-suite select,
+.expedition-suite textarea {
+  background: rgba(5, 10, 22, 0.74);
+  border-color: rgba(71, 85, 105, 0.82);
+  border-radius: 8px;
+  min-height: 44px;
+}
+
+.locations-crud textarea,
+.expedition-suite textarea {
+  min-height: 118px;
+}
+
+.risk-quickset {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0 0 0.65rem;
+}
+
+.risk-quickset button {
+  min-height: 36px;
+  padding: 0.45rem 0.6rem;
+  color: #b7c5d6;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(99, 116, 139, 0.5);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.risk-quickset button.active,
+.risk-quickset button:hover {
+  color: #fff;
+  border-color: rgba(45, 212, 191, 0.42);
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.locations-panel {
+  padding: 1rem;
+}
+
+.locations-crud .toolbar,
+.expedition-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.locations-crud .table-wrap {
+  border-radius: 10px;
+  border-color: rgba(71, 85, 105, 0.76);
+  background: rgba(3, 7, 18, 0.28);
+}
+
+.locations-crud table {
+  min-width: 920px;
+  table-layout: fixed;
+}
+
+.locations-crud th {
+  background: rgba(6, 12, 25, 0.94);
+  color: #a8b5c7;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.locations-crud th:nth-child(1) { width: 25%; }
+.locations-crud th:nth-child(2) { width: 20%; }
+.locations-crud th:nth-child(3) { width: 18%; }
+.locations-crud th:nth-child(4) { width: 22%; }
+.locations-crud th:nth-child(5) { width: 15%; }
+
+.location-title-cell {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 0.72rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.location-title-cell strong {
+  color: #f8fafc;
+  display: block;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location-title-cell small {
+  color: #93a4bb;
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 0.16rem;
+}
+
+.location-sigil {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #e5f8ff;
+  font-weight: 900;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.48);
+}
+
+.location-sigil--moderate {
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.34);
+}
+
+.location-sigil--extreme {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.46);
+}
+
+.risk-meter {
+  min-width: 132px;
+}
+
+.risk-meter-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-bottom: 0.4rem;
+}
+
+.risk-meter-head span {
+  color: #d7e2ef;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.risk-meter-head strong {
+  color: #e2e8f0;
+  font-size: 0.78rem;
+}
+
+.risk-meter-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.13);
+}
+
+.risk-meter-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #38bdf8;
+}
+
+.risk-meter--low .risk-meter-track span {
+  background: #34d399;
+}
+
+.risk-meter--moderate .risk-meter-track span {
+  background: #f59e0b;
+}
+
+.risk-meter--extreme .risk-meter-track span {
+  background: linear-gradient(90deg, #f97316, #ef4444);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.38);
+}
+
+.locations-crud .truncate {
+  color: #c7d2df;
+  max-width: none;
+}
+
+/* Expedition command center refinements */
+.expedition-suite .crud-header .subtitle {
+  margin-bottom: 0;
+}
+
+.expedition-stat {
+  position: relative;
+  overflow: hidden;
+}
+
+.expedition-stat::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(45, 212, 191, 0.8), rgba(56, 189, 248, 0.2));
+}
+
+.expedition-form {
+  padding: 1.25rem;
+}
+
+.expedition-suite .panel-kicker {
+  margin-bottom: 0.75rem;
+}
+
+.operations-preview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.operations-preview > div {
+  padding: 0.78rem;
+}
+
+.operations-preview strong {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expedition-board {
+  padding: 1rem;
+}
+
+.expedition-toolbar {
+  grid-template-columns: minmax(250px, 1fr) auto auto;
+  margin-bottom: 1rem;
+}
+
+.expedition-toolbar .search-bar {
+  padding-left: 2.45rem;
+}
+
+.filter-pills {
+  align-items: center;
+}
+
+.filter-pills button {
+  min-height: 38px;
+}
+
+.expedition-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.expedition-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.08), transparent 36%);
+  pointer-events: none;
+}
+
+.expedition-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.readiness-progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.readiness-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #14b8a6, #22c55e);
+  box-shadow: 0 0 14px rgba(20, 184, 166, 0.26);
+}
+
+.expedition-card .row-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.expedition-card .action-btn {
+  min-height: 36px;
+  padding: 0.5rem 0.72rem;
+  font-size: 0.76rem;
+}
+
+.expedition-card .btn-primary.action-btn {
+  color: #03130e;
+}
+
+/* Payment gateway */
+.payment-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(20, 184, 166, 0.12), transparent 42%),
+    rgba(2, 6, 14, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.payment-modal {
+  width: min(980px, 100%);
+  max-height: min(88vh, 820px);
+  overflow-y: auto;
+  padding: 1.15rem;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(4, 9, 19, 0.98));
+  border: 1px solid rgba(94, 117, 145, 0.62);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.payment-modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.payment-modal-head h3 {
+  color: #f8fafc;
+  font-size: 1.3rem;
+  margin: 0.55rem 0 0.22rem;
+}
+
+.payment-modal-head p {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.payment-close {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 999px;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  font-size: 1.35rem;
+}
+
+.payment-close:hover {
+  color: #fff;
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(127, 29, 29, 0.18);
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 1rem;
+}
+
+.gateway-panel,
+.payment-summary {
+  border-radius: 12px;
+  border: 1px solid rgba(71, 85, 105, 0.7);
+  background: rgba(7, 12, 24, 0.68);
+  padding: 1rem;
+}
+
+.gateway-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(45, 212, 191, 0.15), transparent 44%),
+    rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(45, 212, 191, 0.18);
+}
+
+.gateway-brand span {
+  color: #8ee7c2;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.gateway-brand strong {
+  color: #f8fafc;
+  font-size: 1.4rem;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.8rem;
+}
+
+.payment-methods button {
+  min-height: 42px;
+  padding: 0.55rem 0.65rem;
+  color: #b7c5d6;
+  background: rgba(15, 23, 42, 0.74);
+  border: 1px solid rgba(99, 116, 139, 0.48);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.payment-methods button.active,
+.payment-methods button:hover {
+  color: #ecfeff;
+  border-color: rgba(45, 212, 191, 0.45);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.gateway-panel input:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.payment-terms {
+  margin-top: 0.75rem;
+}
+
+.payment-summary h4 {
+  color: #f8fafc;
+  margin-bottom: 0.85rem;
+}
+
+.payment-summary > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.payment-summary span {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.payment-summary strong {
+  color: #e2e8f0;
+  font-size: 0.92rem;
+}
+
+.payment-summary .payment-total {
+  margin-top: 0.3rem;
+  padding: 0.85rem 0;
+  border-bottom: 0;
+}
+
+.payment-total span,
+.payment-total strong {
+  color: #6ee7b7;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.payment-summary p {
+  color: #93a4bb;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-top: 0.8rem;
+}
+
+.payment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.payment-actions button {
+  min-width: 140px;
 }
 
 @media (max-width: 560px) {
@@ -2077,8 +2660,11 @@ tr:hover td {
 
   .expedition-command-grid,
   .expedition-layout,
+  .intel-grid,
+  .locations-crud .crud-grid,
   .travel-requirements,
   .service-preview,
+  .operations-preview,
   .itinerary-strip,
   .expedition-meta-grid,
   .readiness-list {
@@ -2086,7 +2672,25 @@ tr:hover td {
   }
 
   .expedition-toolbar {
+    grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .locations-crud .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-grid,
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-actions {
+    flex-direction: column-reverse;
+  }
+
+  .payment-actions button {
+    width: 100%;
   }
 }
 

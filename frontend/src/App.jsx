@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import axios from "axios";
 import Usuarios from "./components/Usuarios";
 import Lugares from "./components/Lugares";
@@ -16,7 +16,17 @@ const monsterAvatar = (user) => {
 
 function App() {
   const [tab, setTab] = useState("usuarios");
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = sessionStorage.getItem("arkham_investigator");
+    if (!savedUser) return null;
+
+    try {
+      return JSON.parse(savedUser);
+    } catch {
+      sessionStorage.removeItem("arkham_investigator");
+      return null;
+    }
+  });
   const [soundActive, setSoundActive] = useState(isSoundEnabled());
   const [metrics, setMetrics] = useState({
     investigatorsCount: 0,
@@ -25,20 +35,7 @@ function App() {
     avgHazard: 0
   });
 
-  useEffect(() => {
-    // sessionStorage clears when the browser tab/window is closed,
-    // ensuring the login screen always shows on a fresh visit.
-    const savedUser = sessionStorage.getItem("arkham_investigator");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        sessionStorage.removeItem("arkham_investigator");
-      }
-    }
-  }, []);
-
-  const loadMetrics = async () => {
+  const loadMetrics = useCallback(async () => {
     try {
       const [uRes, lRes, eRes] = await Promise.all([
         axios.get(`${API_BASE}/api/usuarios`),
@@ -62,13 +59,13 @@ function App() {
     } catch (err) {
       console.error("Error al cargar métricas", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (user) {
-      loadMetrics();
+      Promise.resolve().then(loadMetrics);
     }
-  }, [user, tab]);
+  }, [loadMetrics, user, tab]);
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
@@ -155,7 +152,7 @@ function App() {
         <div className="sidebar-profile-card">
           <div className="sidebar-profile-avatar-wrap">
             <img
-              src={user.avatar_url || monsterAvatar(user)}
+              src={monsterAvatar(user)}
               alt={user.nombre}
               className="sidebar-profile-avatar"
               onError={(e) => { e.target.src = monsterAvatar(user); }}
@@ -264,7 +261,7 @@ function App() {
 
         {tab === "usuarios" && <Usuarios apiBase={API_BASE} onDataChange={loadMetrics} />}
         {tab === "lugares" && <Lugares apiBase={API_BASE} onDataChange={loadMetrics} />}
-        {tab === "expediciones" && <Expediciones apiBase={API_BASE} onDataChange={loadMetrics} />}
+        {tab === "expediciones" && <Expediciones apiBase={API_BASE} user={user} onDataChange={loadMetrics} />}
       </main>
     </div>
   );

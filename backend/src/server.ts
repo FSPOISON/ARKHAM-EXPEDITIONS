@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import usuariosRouter from "./routes/usuarios.routes";
 import expedicionesRouter from "./routes/expediciones.routes";
 import lugaresRouter from "./routes/lugares.routes";
+import pagosRouter from "./routes/pagos.routes";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/usuarios", usuariosRouter);
 app.use("/api/expediciones", expedicionesRouter);
 app.use("/api/lugares", lugaresRouter);
+app.use("/api/pagos", pagosRouter);
 
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error("Error capturado en el backend:", err);

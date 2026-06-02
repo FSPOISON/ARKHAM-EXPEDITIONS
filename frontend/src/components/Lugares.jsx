@@ -1,8 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { playClick, playHover } from "../utils/audioHelper";
 
 const emptyForm = { nombre: "", direccion: "", descripcion: "", nivel_peligro: "" };
+
+const getRiskMeta = (level) => {
+  const lvl = Number(level) || 0;
+  if (!lvl) return { className: "unknown", label: "Sin evaluar", detail: "N/D", value: 0 };
+  if (lvl <= 3) return { className: "low", label: "Controlado", detail: `${lvl}/10`, value: lvl };
+  if (lvl <= 7) return { className: "moderate", label: "Inestable", detail: `${lvl}/10`, value: lvl };
+  return { className: "extreme", label: "Crítico", detail: `${lvl}/10`, value: lvl };
+};
 
 export default function Lugares({ apiBase, onDataChange }) {
   const API_URL = `${apiBase}/api/lugares`;
@@ -14,22 +22,22 @@ export default function Lugares({ apiBase, onDataChange }) {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
-  const cargar = async () => {
+  const cargar = useCallback(async () => {
     setCargando(true);
     setError("");
     try {
       const { data } = await axios.get(API_URL);
       setLugares(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       setError("Error al cargar ubicaciones malditas.");
     } finally {
       setCargando(false);
     }
-  };
+  }, [API_URL]);
 
   useEffect(() => {
-    cargar();
-  }, []);
+    Promise.resolve().then(cargar);
+  }, [cargar]);
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -41,6 +49,22 @@ export default function Lugares({ apiBase, onDataChange }) {
           .includes(q)
     );
   }, [lugares, busqueda]);
+
+  const estadisticas = useMemo(() => {
+    const evaluados = lugares.filter((l) => Number(l.nivel_peligro));
+    const riesgoAlto = lugares.filter((l) => Number(l.nivel_peligro) >= 8).length;
+    const documentados = lugares.filter((l) => (l.descripcion || "").trim()).length;
+    const promedio = evaluados.length
+      ? evaluados.reduce((acc, l) => acc + Number(l.nivel_peligro), 0) / evaluados.length
+      : 0;
+
+    return {
+      total: lugares.length,
+      riesgoAlto,
+      documentados,
+      promedio
+    };
+  }, [lugares]);
 
   const guardar = async (e) => {
     e.preventDefault();
@@ -97,19 +121,22 @@ export default function Lugares({ apiBase, onDataChange }) {
   };
 
   const getHazardBadge = (level) => {
-    const lvl = Number(level);
-    if (!lvl) return <span className="hazard-badge unknown">Desconocido</span>;
-    if (lvl <= 3) {
-      return <span className="hazard-badge low">Riesgo Bajo ({lvl}/10)</span>;
-    } else if (lvl <= 7) {
-      return <span className="hazard-badge moderate">Riesgo Moderado ({lvl}/10)</span>;
-    } else {
-      return <span className="hazard-badge extreme pulsing-red">Peligro Extremo ({lvl}/10)</span>;
-    }
+    const risk = getRiskMeta(level);
+    return (
+      <div className={`risk-meter risk-meter--${risk.className}`}>
+        <div className="risk-meter-head">
+          <span>{risk.label}</span>
+          <strong>{risk.detail}</strong>
+        </div>
+        <div className="risk-meter-track">
+          <span style={{ width: `${risk.value * 10}%` }} />
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="crud-container fade-in-scale">
+    <div className="crud-container locations-crud fade-in-scale">
       <div className="crud-header">
         <h2>Ubicaciones Clasificadas</h2>
         <p className="subtitle">
@@ -117,10 +144,34 @@ export default function Lugares({ apiBase, onDataChange }) {
         </p>
       </div>
 
+      <div className="intel-grid">
+        <div className="intel-card">
+          <span>Archivo</span>
+          <strong>{estadisticas.total}</strong>
+          <small>ubicaciones registradas</small>
+        </div>
+        <div className="intel-card danger">
+          <span>Críticas</span>
+          <strong>{estadisticas.riesgoAlto}</strong>
+          <small>requieren contención</small>
+        </div>
+        <div className="intel-card">
+          <span>Promedio</span>
+          <strong>{estadisticas.promedio.toFixed(1)}</strong>
+          <small>nivel de riesgo global</small>
+        </div>
+        <div className="intel-card">
+          <span>Con notas</span>
+          <strong>{estadisticas.documentados}</strong>
+          <small>expedientes documentados</small>
+        </div>
+      </div>
+
       <div className="crud-grid">
         {/* Left Column: Form */}
         <div className="form-card-column animate-slide-right">
-          <div className="form-panel">
+          <div className="form-panel location-form-panel">
+            <div className="panel-kicker">Cartografía anómala</div>
             <h3>{editId ? "Modificar Archivo" : "Archivar Ubicación"}</h3>
             <p className="form-desc-text">Registra datos topográficos del horror.</p>
             <form onSubmit={guardar}>
@@ -152,6 +203,26 @@ export default function Lugares({ apiBase, onDataChange }) {
                   placeholder="Nivel de Terror (1-10)"
                 />
               </div>
+              <div className="risk-quickset" aria-label="Niveles rápidos de riesgo">
+                {[
+                  ["3", "Bajo"],
+                  ["6", "Medio"],
+                  ["9", "Crítico"]
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={String(form.nivel_peligro) === value ? "active" : ""}
+                    onClick={() => {
+                      playClick();
+                      setForm({ ...form, nivel_peligro: value });
+                    }}
+                    onMouseEnter={playHover}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <div className="input-group">
                 <textarea
                   name="descripcion"
@@ -161,7 +232,7 @@ export default function Lugares({ apiBase, onDataChange }) {
                 ></textarea>
               </div>
 
-              <div className="actions">
+              <div className="actions user-form-actions">
                 <button
                   type="submit"
                   className="btn-primary"
@@ -190,10 +261,10 @@ export default function Lugares({ apiBase, onDataChange }) {
 
         {/* Right Column: Table */}
         <div className="table-card-column">
-          <div className="table-panel">
+          <div className="table-panel locations-panel">
             <div className="toolbar">
               <div className="search-wrapper">
-                <span className="search-icon">🔍</span>
+                <span className="search-icon" aria-hidden="true">⌕</span>
                 <input
                   className="search-bar"
                   value={busqueda}
@@ -210,6 +281,7 @@ export default function Lugares({ apiBase, onDataChange }) {
                 }}
                 onMouseEnter={playHover}
               >
+                <span aria-hidden="true">↻</span>
                 Sincronizar
               </button>
             </div>
@@ -237,12 +309,23 @@ export default function Lugares({ apiBase, onDataChange }) {
                       </td>
                     </tr>
                   ) : (
-                    filtrados.map((l) => (
+                    filtrados.map((l) => {
+                      const risk = getRiskMeta(l.nivel_peligro);
+
+                      return (
                       <tr key={l.id_lugar} className="table-row-animate">
                         <td className="lugar-nombre-cell">
-                          <strong>{l.nombre}</strong>
+                          <div className="location-title-cell">
+                            <span className={`location-sigil location-sigil--${risk.className}`}>
+                              {risk.value >= 8 ? "!" : risk.value ? risk.value : "?"}
+                            </span>
+                            <div>
+                              <strong>{l.nombre}</strong>
+                              <small>Archivo L-{String(l.id_lugar).padStart(3, "0")}</small>
+                            </div>
+                          </div>
                         </td>
-                        <td>{l.direccion || "Desconocida"}</td>
+                        <td className="muted-cell">{l.direccion || "Desconocida"}</td>
                         <td>{getHazardBadge(l.nivel_peligro)}</td>
                         <td className="truncate" title={l.descripcion}>
                           {l.descripcion || "Sin reportes oficiales."}
@@ -250,7 +333,7 @@ export default function Lugares({ apiBase, onDataChange }) {
                         <td className="row-actions">
                           <button
                             type="button"
-                            className="btn-secondary"
+                            className="btn-secondary action-btn"
                             onClick={() => {
                               playClick();
                               setEditId(l.id_lugar);
@@ -262,7 +345,7 @@ export default function Lugares({ apiBase, onDataChange }) {
                           </button>
                           <button
                             type="button"
-                            className="btn-danger"
+                            className="btn-danger action-btn"
                             onClick={() => eliminar(l.id_lugar)}
                             onMouseEnter={playHover}
                           >
@@ -270,7 +353,8 @@ export default function Lugares({ apiBase, onDataChange }) {
                           </button>
                         </td>
                       </tr>
-                    ))
+                      );
+                    })
                   )}
                 </tbody>
               </table>

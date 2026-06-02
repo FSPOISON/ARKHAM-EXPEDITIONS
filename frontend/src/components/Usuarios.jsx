@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { playClick, playHover } from "../utils/audioHelper";
 
@@ -11,7 +11,7 @@ const getCreatureProfile = (user) => {
 
   return {
     variant,
-    avatar: user.avatar_url || `https://robohash.org/${seed}.png?set=set2&size=160x160`,
+    avatar: `https://robohash.org/${seed}.png?set=set2&size=160x160`,
   };
 };
 
@@ -25,7 +25,7 @@ export default function Usuarios({ apiBase, onDataChange }) {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
-  const cargarUsuarios = async () => {
+  const cargarUsuarios = useCallback(async () => {
     setCargando(true);
     setError("");
     try {
@@ -36,11 +36,11 @@ export default function Usuarios({ apiBase, onDataChange }) {
     } finally {
       setCargando(false);
     }
-  };
+  }, [API_URL]);
 
   useEffect(() => {
-    cargarUsuarios();
-  }, []);
+    Promise.resolve().then(cargarUsuarios);
+  }, [cargarUsuarios]);
 
   const usuariosFiltrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
