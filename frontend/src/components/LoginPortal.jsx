@@ -25,14 +25,17 @@ export default function LoginPortal({ onLoginSuccess }) {
   const [showRegPass, setShowRegPass] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
 
+  // Login fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
+  // Register fields
   const [regNombre, setRegNombre] = useState("");
   const [regApellido, setRegApellido] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regTelefono, setRegTelefono] = useState("");
+  const [regRol, setRegRol] = useState("investigador");
 
   const googleButtonRef = useRef(null);
 
@@ -92,13 +95,7 @@ export default function LoginPortal({ onLoginSuccess }) {
             setError("No fue posible completar el acceso con Google. Inténtalo nuevamente.");
             return;
           }
-          executeOAuthLogin(
-            {
-              provider: "google",
-              id_token: res.credential
-            },
-            "Google"
-          );
+          executeOAuthLogin({ provider: "google", id_token: res.credential }, "Google");
         },
         auto_select: false,
         cancel_on_tap_outside: true
@@ -225,23 +222,25 @@ export default function LoginPortal({ onLoginSuccess }) {
 
   return (
     <div className="lp-bg">
+      {/* Partículas */}
       <div className="lp-particles" aria-hidden="true">
-        {particles.map((particle) => (
+        {particles.map((p) => (
           <span
-            key={particle.id}
+            key={p.id}
             className="lp-particle"
             style={{
-              left: particle.left,
-              animationDelay: particle.animationDelay,
-              animationDuration: particle.animationDuration,
-              width: particle.size,
-              height: particle.size,
-              opacity: particle.opacity
+              left: p.left,
+              animationDelay: p.animationDelay,
+              animationDuration: p.animationDuration,
+              width: p.size,
+              height: p.size,
+              opacity: p.opacity
             }}
           />
         ))}
       </div>
 
+      {/* Sonido */}
       <button
         className={`lp-sound-btn ${soundActive ? "active" : ""}`}
         onClick={handleToggleSound}
@@ -252,7 +251,9 @@ export default function LoginPortal({ onLoginSuccess }) {
         {soundActive ? "🔊" : "🔇"}
       </button>
 
+      {/* Card principal */}
       <div className="lp-card">
+        {/* Brand */}
         <div className="lp-brand">
           <div className="lp-brand-icon">
             <span className="lp-brand-rune">⬡</span>
@@ -262,19 +263,21 @@ export default function LoginPortal({ onLoginSuccess }) {
           <div className="lp-brand-line" />
         </div>
 
+        {/* Alertas */}
         {error && (
-          <div className="lp-alert lp-alert--error animate-shake">
+          <div className="lp-alert lp-alert--error animate-shake" role="alert">
             <span className="lp-alert-icon">⚠</span>
             <span>{error}</span>
           </div>
         )}
         {mensaje && (
-          <div className="lp-alert lp-alert--ok">
+          <div className="lp-alert lp-alert--ok" role="status">
             <span className="lp-alert-icon">✓</span>
             <span>{mensaje}</span>
           </div>
         )}
 
+        {/* ── LOGIN ── */}
         {view === "login" && (
           <div className="lp-view fade-in">
             <p className="lp-view-heading">Iniciar Sesión</p>
@@ -342,10 +345,8 @@ export default function LoginPortal({ onLoginSuccess }) {
               </button>
             </form>
 
-            <div className="lp-divider">
-              <span>o continúa con</span>
-            </div>
-
+            {/* Google */}
+            <div className="lp-divider"><span>o continúa con</span></div>
             <div className="lp-oauth-stack">
               <div
                 ref={googleButtonRef}
@@ -372,20 +373,49 @@ export default function LoginPortal({ onLoginSuccess }) {
 
             <p className="lp-footer-text">
               ¿No tienes cuenta?{" "}
-              <button
-                type="button"
-                className="lp-link-btn"
-                onClick={() => switchView("register")}
-              >
+              <button type="button" className="lp-link-btn" onClick={() => switchView("register")}>
                 Crear cuenta nueva
               </button>
             </p>
           </div>
         )}
 
+        {/* ── REGISTRO ── */}
         {view === "register" && (
           <div className="lp-view fade-in">
             <p className="lp-view-heading">Crear Cuenta</p>
+
+            {/* Selector de rol — visual/informativo */}
+            <div className="lp-role-selector">
+              <p className="lp-role-label">¿Cómo quieres unirte?</p>
+              <div className="lp-role-options">
+                <button
+                  type="button"
+                  className={`lp-role-option ${regRol === "investigador" ? "active" : ""}`}
+                  onClick={() => { playClick(); setRegRol("investigador"); }}
+                  onMouseEnter={playHover}
+                >
+                  <span className="lp-role-icon">🔰</span>
+                  <span className="lp-role-name">Investigador</span>
+                  <span className="lp-role-desc">Explora y reserva expediciones</span>
+                </button>
+                <button
+                  type="button"
+                  className={`lp-role-option ${regRol === "admin" ? "active admin" : ""}`}
+                  onClick={() => { playClick(); setRegRol("admin"); }}
+                  onMouseEnter={playHover}
+                >
+                  <span className="lp-role-icon">⚔️</span>
+                  <span className="lp-role-name">Administrador</span>
+                  <span className="lp-role-desc">Gestiona toda la plataforma</span>
+                </button>
+              </div>
+              {regRol === "admin" && (
+                <p className="lp-role-admin-note">
+                  ⚠️ El rol de administrador es asignado por el equipo directivo. Tu cuenta se creará como Investigador y el equipo actualizará tus permisos.
+                </p>
+              )}
+            </div>
 
             <form onSubmit={handleStandardRegister} className="lp-form" noValidate>
               <div className="lp-form-row">
@@ -503,11 +533,7 @@ export default function LoginPortal({ onLoginSuccess }) {
 
             <p className="lp-footer-text">
               ¿Ya tienes cuenta?{" "}
-              <button
-                type="button"
-                className="lp-link-btn"
-                onClick={() => switchView("login")}
-              >
+              <button type="button" className="lp-link-btn" onClick={() => switchView("login")}>
                 Iniciar Sesión
               </button>
             </p>
@@ -521,6 +547,7 @@ export default function LoginPortal({ onLoginSuccess }) {
         </p>
       </div>
 
+      {/* Loading overlay */}
       {isBusy && (
         <div className="lp-loading-overlay" aria-busy="true">
           <div className="lp-loading-content">

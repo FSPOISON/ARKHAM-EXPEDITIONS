@@ -1,285 +1,246 @@
 import { useState } from "react";
 import { playClick } from "../utils/audioHelper";
 
-export default function Informacion() {
+const FEATURES_INVESTIGADOR = [
+  {
+    icon: "🗺️",
+    title: "Explorar Expediciones",
+    desc: "Navega el catálogo completo de expediciones internacionales. Filtra por destino, dificultad, fechas y nivel de riesgo."
+  },
+  {
+    icon: "💳",
+    title: "Reservar y Pagar",
+    desc: "Reserva tu lugar en cualquier expedición con nuestra pasarela segura. Recibe confirmación con referencia única."
+  },
+  {
+    icon: "📍",
+    title: "Consultar Ubicaciones",
+    desc: "Accede al archivo de ubicaciones clasificadas con nivel de peligro, coordenadas y notas de campo de investigadores anteriores."
+  },
+  {
+    icon: "👤",
+    title: "Gestionar tu Perfil",
+    desc: "Actualiza tu información personal. Consulta tu reputación, nivel de explorador y expediciones realizadas."
+  }
+];
+
+const FEATURES_ADMIN = [
+  {
+    icon: "⚔️",
+    title: "Gestión de Investigadores",
+    desc: "Reclutar nuevos investigadores, modificar expedientes y administrar todo el registro de agentes activos."
+  },
+  {
+    icon: "🏗️",
+    title: "Crear Expediciones",
+    desc: "Programa nuevas expediciones internacionales con fechas, precios, cupos, documentación y nivel de riesgo."
+  },
+  {
+    icon: "🗄️",
+    title: "Administrar Ubicaciones",
+    desc: "Agrega, edita y elimina ubicaciones del archivo clasificado. Actualiza niveles de peligro y notas de campo."
+  },
+  {
+    icon: "📊",
+    title: "Panel de Control",
+    desc: "Vista global con métricas de investigadores activos, expediciones programadas, pagos y riesgo promedio."
+  }
+];
+
+const FAQ = [
+  {
+    q: "¿Qué necesito para unirme a una expedición?",
+    a: "Registrarte como investigador y tener la documentación requerida (pasaporte, visa según destino). Cada expedición detalla sus requisitos específicos."
+  },
+  {
+    q: "¿Cómo funciona el sistema de pagos?",
+    a: "Al reservar una expedición se genera una referencia única. Los pagos se procesan de forma segura y quedan registrados en tu historial."
+  },
+  {
+    q: "¿Qué diferencia hay entre Investigador y Administrador?",
+    a: "Los investigadores pueden explorar y reservar expediciones. Los administradores además pueden crear expediciones, gestionar investigadores y administrar ubicaciones."
+  },
+  {
+    q: "¿Puedo cancelar una reserva?",
+    a: "Sí, hasta 48 horas antes del inicio sin penalización. Consulta los términos específicos de cada expedición."
+  },
+  {
+    q: "¿Qué es el nivel de riesgo en las ubicaciones?",
+    a: "Una escala del 1 al 10 que indica la peligrosidad operativa del destino. Niveles 8-10 requieren protocolo de seguridad reforzado."
+  }
+];
+
+export default function Informacion({ user }) {
   const [expandedFaq, setExpandedFaq] = useState(null);
 
-  const toggleFaq = (index) => {
+  const toggleFaq = (i) => {
     playClick();
-    setExpandedFaq(expandedFaq === index ? null : index);
+    setExpandedFaq(expandedFaq === i ? null : i);
   };
 
-  const faqItems = [
-    {
-      pregunta: "¿Qué requisitos tengo para unirme a una expedición?",
-      respuesta: "Debes estar registrado como investigador. Algunas expediciones requieren pasaporte válido, visa de ciertos países, y certificados de salud mental. Consulta los detalles específicos de cada expedición."
-    },
-    {
-      pregunta: "¿Qué sucede si encuentro evidencia paranormal?",
-      respuesta: "Puedes cargar evidencia multimedia (fotos, videos, archivos de audio) directamente en el portal. Nuestro equipo de expertos revisará todo el material para análisis."
-    },
-    {
-      pregunta: "¿Cuáles son los niveles de dificultad?",
-      respuesta: "Tenemos 5 niveles: Novato (nivel 1), Explorador (2), Veterano (3), Experto (4), y Maestro Investigador (5). Comienza con expediciones de tu nivel."
-    },
-    {
-      pregunta: "¿Puedo retractarme de una expedición?",
-      respuesta: "Sí, pero depende de la fase. Hasta 48 horas antes del inicio puedes cancelar sin penalización. Después de eso, se aplicarán políticas según los términos de la expedición."
-    },
-    {
-      pregunta: "¿Cómo se calcula la reputación?",
-      respuesta: "Ganas puntos de reputación por completar expediciones, proporcionar evidencia valiosa, y obtener buenas calificaciones de otros investigadores. La reputación abre acceso a expediciones exclusivas."
-    },
-    {
-      pregunta: "¿Es seguro investigar lugares malditos?",
-      respuesta: "Nuestras expediciones están diseñadas con protocolos de seguridad. Sin embargo, la investigación paranormal siempre conlleva riesgos. Asumes los riesgos por tu propia cuenta."
-    }
-  ];
+  const isAdmin = user?.rol === "admin";
 
   return (
-    <div className="info-container fade-in-scale">
-      {/* Hero Section */}
-      <section className="info-hero">
-        <div className="info-hero-content">
-          <h1>ARKHAM EXPEDITIONS</h1>
-          <p className="info-hero-subtitle">Explorando los Misterios del Más Allá</p>
-          <div className="info-divider"></div>
-          <p className="info-hero-description">
-            Somos una agencia internacional dedicada a investigar, documentar y comprender los fenómenos paranormales,
-            las ubicaciones prohibidas y los misterios que desafían la explicación científica convencional.
+    <div className="info-page fade-in">
+
+      {/* ── WELCOME HERO ── */}
+      <section className="info-hero-banner">
+        <div className="info-hero-glow" aria-hidden="true" />
+        <div className="info-hero-body">
+          <div className="info-hero-badge">
+            <span className="info-hero-rune">⬡</span>
+            <span>Portal Activo</span>
+          </div>
+          <h1 className="info-hero-title glitch" data-text="ARKHAM EXPEDITIONS">
+            ARKHAM EXPEDITIONS
+          </h1>
+          <p className="info-hero-sub">Plataforma de Investigación Paranormal Internacional</p>
+          {user && (
+            <div className="info-welcome-chip">
+              <span className={`info-welcome-role ${isAdmin ? "admin" : "inv"}`}>
+                {isAdmin ? "⚔️ Administrador" : "🔰 Investigador"}
+              </span>
+              <span className="info-welcome-name">
+                Bienvenido, <strong>{user.nombre} {user.apellido}</strong>
+              </span>
+            </div>
+          )}
+          <p className="info-hero-desc">
+            Coordina expediciones internacionales, gestiona investigadores, archiva ubicaciones de alto riesgo
+            y procesa reservas — todo desde un único centro de control.
           </p>
         </div>
       </section>
 
-      {/* Quiénes Somos */}
+      {/* ── QUÉ PUEDES HACER ── */}
       <section className="info-section">
-        <div className="info-section-header">
-          <h2>¿Quiénes Somos?</h2>
-          <div className="info-section-divider"></div>
-        </div>
-        <div className="info-section-content">
-          <p>
-            Fundada en 1923 en Miskatonic, Arkham Expeditions se ha convertido en la organización líder en investigación paranormal
-            a nivel global. Nuestro equipo está compuesto por investigadores, académicos, ocultistas y aventureros dedicados a
-            desentrañar los secretos de lo inexplicable.
-          </p>
-          <p>
-            A lo largo de más de un siglo, hemos catalogado miles de ubicaciones anómalas, recopilado evidencia de fenómenos
-            sobrenaturales y documentado encuentros que desafían la comprensión humana. Cada investigador en nuestro registro
-            contribuye a una base de conocimiento sin precedentes.
-          </p>
+        <div className="info-section-label">TU ACCESO</div>
+        <h2 className="info-section-title">
+          {isAdmin ? "Capacidades de Administrador" : "Capacidades de Investigador"}
+        </h2>
+        <div className="info-features-grid">
+          {(isAdmin ? FEATURES_ADMIN : FEATURES_INVESTIGADOR).map((f) => (
+            <div key={f.title} className="info-feature-card">
+              <div className="info-feature-icon">{f.icon}</div>
+              <div className="info-feature-body">
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Servicios */}
+      {/* ── CÓMO FUNCIONA ── */}
       <section className="info-section">
-        <div className="info-section-header">
-          <h2>Nuestros Servicios</h2>
-          <div className="info-section-divider"></div>
-        </div>
-        <div className="services-grid">
-          <div className="service-card">
-            <div className="service-icon">🗺️</div>
-            <h3>Expediciones Paranormales</h3>
-            <p>Participa en expediciones organizadas a ubicaciones de alto interés paranormal alrededor del mundo.</p>
-          </div>
-          <div className="service-card">
-            <div className="service-icon">📸</div>
-            <h3>Análisis de Evidencia</h3>
-            <p>Sube y comparte evidencia multimedia de tus investigaciones. Nuestros expertos la analizan exhaustivamente.</p>
-          </div>
-          <div className="service-card">
-            <div className="service-icon">📚</div>
-            <h3>Archivo de Conocimiento</h3>
-            <p>Acceso a nuestra extensa base de datos sobre fenómenos paranormales, ubicaciones malditas y casos documentados.</p>
-          </div>
-          <div className="service-card">
-            <div className="service-icon">🎓</div>
-            <h3>Capacitación</h3>
-            <p>Obtén certificaciones en investigación paranormal, protocolo de campo y análisis de evidencia.</p>
-          </div>
-          <div className="service-card">
-            <div className="service-icon">👥</div>
-            <h3>Red Global</h3>
-            <p>Conecta con investigadores de todo el mundo, comparte hallazgos y colabora en proyectos especiales.</p>
-          </div>
-          <div className="service-card">
-            <div className="service-icon">🔐</div>
-            <h3>Confidencialidad</h3>
-            <p>Tus investigaciones están protegidas. Información clasificada permanece segura en nuestros archivos.</p>
-          </div>
+        <div className="info-section-label">FLUJO DE USO</div>
+        <h2 className="info-section-title">Cómo Usar la Plataforma</h2>
+        <div className="info-steps-row">
+          {[
+            { n: "01", title: "Inicia Sesión", desc: "Accede con tu cuenta. El sistema detecta tu rol automáticamente." },
+            { n: "02", title: "Explora Secciones", desc: "Usa el menú lateral para navegar: Investigadores, Ubicaciones o Expediciones." },
+            { n: "03", title: "Opera y Gestiona", desc: "Consulta, crea, edita o reserva según tu nivel de acceso." },
+            { n: "04", title: "Sincroniza", desc: "Todos los datos se sincronizan en tiempo real con la base de datos." }
+          ].map((s, i) => (
+            <div key={s.n} className="info-step">
+              <div className="info-step-num">{s.n}</div>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+              {i < 3 && <div className="info-step-arrow" aria-hidden="true">→</div>}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Cómo Funciona */}
+      {/* ── ROLES ── */}
       <section className="info-section">
-        <div className="info-section-header">
-          <h2>Cómo Funciona</h2>
-          <div className="info-section-divider"></div>
-        </div>
-        <div className="how-it-works">
-          <div className="step-item">
-            <div className="step-number">1</div>
-            <div className="step-content">
-              <h3>Regístrate</h3>
-              <p>Crea tu perfil de investigador. Proporciona información básica y acepta los términos de participación.</p>
-            </div>
+        <div className="info-section-label">SISTEMA DE ROLES</div>
+        <h2 className="info-section-title">Investigador vs Administrador</h2>
+        <div className="info-roles-grid">
+          <div className={`info-role-card ${!isAdmin ? "info-role-card--active" : ""}`}>
+            <div className="info-role-icon">🔰</div>
+            <h3>Investigador</h3>
+            <ul>
+              <li>✓ Ver expediciones activas</li>
+              <li>✓ Reservar y pagar expediciones</li>
+              <li>✓ Consultar ubicaciones clasificadas</li>
+              <li>✓ Editar su propio perfil</li>
+              <li>✗ Crear/editar expediciones</li>
+              <li>✗ Gestionar otros usuarios</li>
+            </ul>
           </div>
-          <div className="step-arrow">→</div>
-          <div className="step-item">
-            <div className="step-number">2</div>
-            <div className="step-content">
-              <h3>Explora Expediciones</h3>
-              <p>Navega nuestro catálogo de expediciones disponibles. Filtra por ubicación, dificultad y fecha.</p>
-            </div>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-item">
-            <div className="step-number">3</div>
-            <div className="step-content">
-              <h3>Únete y Prepárate</h3>
-              <p>Completa el registro en la expedición. Recibe instrucciones, requisitos y equipo necesario.</p>
-            </div>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-item">
-            <div className="step-number">4</div>
-            <div className="step-content">
-              <h3>Investiga</h3>
-              <p>Participa en la expedición. Documenta hallazgos, recopila evidencia y sigue protocolos de seguridad.</p>
-            </div>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-item">
-            <div className="step-number">5</div>
-            <div className="step-content">
-              <h3>Reporta y Gana</h3>
-              <p>Sube tu informe y evidencia. Gana reputación y acceso a investigaciones más exclusivas.</p>
-            </div>
+          <div className={`info-role-card ${isAdmin ? "info-role-card--active" : ""}`}>
+            <div className="info-role-icon">⚔️</div>
+            <h3>Administrador</h3>
+            <ul>
+              <li>✓ Todo lo del Investigador</li>
+              <li>✓ Crear y editar expediciones</li>
+              <li>✓ Gestionar todos los investigadores</li>
+              <li>✓ Agregar y editar ubicaciones</li>
+              <li>✓ Ver métricas globales</li>
+              <li>✓ Acceso total al sistema</li>
+            </ul>
           </div>
         </div>
+        <p className="info-roles-note">
+          Tu rol actual: <strong className={isAdmin ? "text-admin" : "text-inv"}>
+            {isAdmin ? "Administrador ⚔️" : "Investigador 🔰"}
+          </strong>.
+          El rol es asignado por el equipo directivo de Arkham Expeditions.
+        </p>
       </section>
 
-      {/* Requisitos */}
+      {/* ── FAQ ── */}
       <section className="info-section">
-        <div className="info-section-header">
-          <h2>Requisitos Generales</h2>
-          <div className="info-section-divider"></div>
-        </div>
-        <div className="requirements-grid">
-          <div className="requirement-item">
-            <span className="req-icon">✓</span>
-            <h3>Edad Mínima</h3>
-            <p>Debes tener al menos 18 años. Se requiere documentación de identidad válida.</p>
-          </div>
-          <div className="requirement-item">
-            <span className="req-icon">✓</span>
-            <h3>Capacidad Física</h3>
-            <p>Buen estado de salud. Algunas expediciones requieren certificado médico.</p>
-          </div>
-          <div className="requirement-item">
-            <span className="req-icon">✓</span>
-            <h3>Pasaporte</h3>
-            <p>Válido por al menos 6 meses para expediciones internacionales.</p>
-          </div>
-          <div className="requirement-item">
-            <span className="req-icon">✓</span>
-            <h3>Seguro</h3>
-            <p>Cobertura de viaje internacional. Se puede contratar a través de nuestra plataforma.</p>
-          </div>
-          <div className="requirement-item">
-            <span className="req-icon">✓</span>
-            <h3>Equipamiento</h3>
-            <p>Equipo básico de investigación. Proporcionamos lista de recomendaciones.</p>
-          </div>
-          <div className="requirement-item">
-            <span className="req-icon">✓</span>
-            <h3>Compromiso</h3>
-            <p>Adherencia a protocolos de seguridad y confidencialidad. Firma de acuerdos legales.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="info-section">
-        <div className="info-section-header">
-          <h2>Preguntas Frecuentes</h2>
-          <div className="info-section-divider"></div>
-        </div>
-        <div className="faq-container">
-          {faqItems.map((item, index) => (
-            <div
-              key={index}
-              className={`faq-item ${expandedFaq === index ? "expanded" : ""}`}
-              onMouseEnter={playHover}
-            >
-              <button
-                className="faq-question"
-                onClick={() => toggleFaq(index)}
-              >
-                <span className="faq-toggle">
-                  {expandedFaq === index ? "−" : "+"}
-                </span>
-                <span>{item.pregunta}</span>
+        <div className="info-section-label">SOPORTE</div>
+        <h2 className="info-section-title">Preguntas Frecuentes</h2>
+        <div className="info-faq-list">
+          {FAQ.map((item, i) => (
+            <div key={i} className={`info-faq-item ${expandedFaq === i ? "open" : ""}`}>
+              <button className="info-faq-q" onClick={() => toggleFaq(i)}>
+                <span>{item.q}</span>
+                <span className="info-faq-chevron">{expandedFaq === i ? "−" : "+"}</span>
               </button>
-              {expandedFaq === index && (
-                <div className="faq-answer fade-in-fast">
-                  {item.respuesta}
-                </div>
+              {expandedFaq === i && (
+                <div className="info-faq-a">{item.a}</div>
               )}
             </div>
           ))}
         </div>
       </section>
 
-      {/* Contacto */}
-      <section className="info-section info-section-last">
-        <div className="info-section-header">
-          <h2>Ponte en Contacto</h2>
-          <div className="info-section-divider"></div>
-        </div>
-        <div className="contact-content">
-          <div className="contact-item">
-            <span className="contact-icon">📧</span>
-            <div>
-              <h3>Correo Electrónico</h3>
-              <p>investigadores@arkhamexpeditions.com</p>
+      {/* ── CONTACTO ── */}
+      <section className="info-section info-section--last">
+        <div className="info-section-label">CONTACTO</div>
+        <h2 className="info-section-title">Centro de Operaciones</h2>
+        <div className="info-contact-grid">
+          {[
+            { icon: "📧", label: "Correo", value: "investigadores@arkhamexpeditions.com" },
+            { icon: "📍", label: "Sede", value: "Miskatonic, Massachusetts, USA" },
+            { icon: "📞", label: "Línea directa", value: "+1 (978) ARKHAM-1" },
+            { icon: "🌐", label: "Portal", value: "www.arkhamexpeditions.com" }
+          ].map((c) => (
+            <div key={c.label} className="info-contact-item">
+              <span className="info-contact-icon">{c.icon}</span>
+              <div>
+                <div className="info-contact-label">{c.label}</div>
+                <div className="info-contact-value">{c.value}</div>
+              </div>
             </div>
-          </div>
-          <div className="contact-item">
-            <span className="contact-icon">📍</span>
-            <div>
-              <h3>Oficina Principal</h3>
-              <p>Miskatonic, Massachusetts, USA</p>
-            </div>
-          </div>
-          <div className="contact-item">
-            <span className="contact-icon">📞</span>
-            <div>
-              <h3>Línea de Investigaciones</h3>
-              <p>+1 (978) ARKHAM-1</p>
-            </div>
-          </div>
-          <div className="contact-item">
-            <span className="contact-icon">🌐</span>
-            <div>
-              <h3>Portal Web</h3>
-              <p>www.arkhamexpeditions.com</p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ── FOOTER ── */}
       <footer className="info-footer">
-        <p>© 1923-2026 Arkham Expeditions. Todos los derechos reservados.</p>
-        <p className="info-footer-legal">
-          <span style={{ cursor: "pointer" }}>Términos de Servicio</span>
-          {" • "}
-          <span style={{ cursor: "pointer" }}>Política de Privacidad</span>
-          {" • "}
-          <span style={{ cursor: "pointer" }}>Aviso de Seguridad</span>
-        </p>
+        <p>© 1923–{new Date().getFullYear()} Arkham Expeditions. Todos los derechos reservados.</p>
+        <div className="info-footer-links">
+          <span>Términos de Servicio</span>
+          <span>·</span>
+          <span>Política de Privacidad</span>
+          <span>·</span>
+          <span>Aviso de Seguridad</span>
+        </div>
       </footer>
     </div>
   );
