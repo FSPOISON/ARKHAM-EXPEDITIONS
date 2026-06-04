@@ -13,6 +13,18 @@ const toId = (value: string): bigint | null => {
 };
 
 const serialize = (payload: any) => {
+  const withRole = (u: any) => {
+    if (!u || typeof u !== "object") return u;
+    const adminEmails = (process.env.ADMIN_EMAILS || "")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+    const email = String(u.email || "").toLowerCase();
+    const isAdmin = adminEmails.includes(email) || String(u.id_usuario || "") === "1";
+    u.rol = isAdmin ? "admin" : "investigador";
+    return u;
+  };
+
   const clean = JSON.parse(
     JSON.stringify(payload, (_key, value) =>
       typeof value === "bigint" ? value.toString() : value
@@ -20,12 +32,28 @@ const serialize = (payload: any) => {
   );
   if (clean && typeof clean === "object") {
     if (Array.isArray(clean)) {
-      clean.forEach(u => { if (u) delete u.contrasena; });
+      clean.forEach(u => {
+        if (u) {
+          delete u.contrasena;
+          withRole(u);
+        }
+      });
     } else {
       delete clean.contrasena;
+      withRole(clean);
     }
   }
   return clean;
+};
+
+const actorFrom = (req: any) => ({
+  id: toId(String(req.header("x-arkham-user") || "")),
+  role: String(req.header("x-arkham-role") || "investigador").toLowerCase()
+});
+
+const canManageUser = (req: any, targetId: bigint) => {
+  const actor = actorFrom(req);
+  return actor.role === "admin" || Boolean(actor.id && actor.id === targetId);
 };
 
 type OAuthProfile = {
@@ -125,9 +153,11 @@ const verifyFacebookToken = async (accessToken: string): Promise<OAuthProfile> =
   };
 };
 
-router.get("/", async (_req, res, next) => {
+router.get("/", async (req, res, next) => {
+  const actor = actorFrom(req);
   try {
     const usuarios = await prisma.tbl_usuarios.findMany({
+      where: actor.role === "admin" || !actor.id ? undefined : { id_usuario: actor.id },
       orderBy: { id_usuario: "desc" }
     });
     res.json(serialize(usuarios));
@@ -279,6 +309,11 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
+  const actor = actorFrom(req);
+  if (actor.role !== "admin") {
+    return res.status(403).json({ message: "Solo un administrador puede reclutar nuevos investigadores." });
+  }
+
   const { nombre, apellido, email, telefono } = req.body;
   if (!nombre || !apellido || !email) {
     return res.status(400).json({ message: "nombre, apellido y email son obligatorios" });
@@ -307,6 +342,9 @@ router.post("/", async (req, res, next) => {
 router.put("/:id", async (req, res, next) => {
   const id = toId(req.params.id);
   if (!id) return res.status(400).json({ message: "ID invalido" });
+  if (!canManageUser(req, id)) {
+    return res.status(403).json({ message: "No puedes modificar expedientes de otros investigadores." });
+  }
 
   const data: any = { actualizado_en: new Date() };
   if (req.body.nombre !== undefined) data.nombre = req.body.nombre;
@@ -344,6 +382,9 @@ router.put("/:id", async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
   const id = toId(req.params.id);
   if (!id) return res.status(400).json({ message: "ID invalido" });
+  if (!canManageUser(req, id)) {
+    return res.status(403).json({ message: "No puedes desterrar expedientes de otros investigadores." });
+  }
 
   try {
     await prisma.tbl_usuarios.delete({ where: { id_usuario: id } });
