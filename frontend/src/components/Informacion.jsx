@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { playClick, playHover } from "../utils/audioHelper";
+import { playClick } from "../utils/audioHelper";
 
 export default function Informacion() {
   const [expandedFaq, setExpandedFaq] = useState(null);
@@ -78,32 +78,32 @@ export default function Informacion() {
           <div className="info-section-divider"></div>
         </div>
         <div className="services-grid">
-          <div className="service-card" onMouseEnter={playHover}>
+          <div className="service-card">
             <div className="service-icon">🗺️</div>
             <h3>Expediciones Paranormales</h3>
             <p>Participa en expediciones organizadas a ubicaciones de alto interés paranormal alrededor del mundo.</p>
           </div>
-          <div className="service-card" onMouseEnter={playHover}>
+          <div className="service-card">
             <div className="service-icon">📸</div>
             <h3>Análisis de Evidencia</h3>
             <p>Sube y comparte evidencia multimedia de tus investigaciones. Nuestros expertos la analizan exhaustivamente.</p>
           </div>
-          <div className="service-card" onMouseEnter={playHover}>
+          <div className="service-card">
             <div className="service-icon">📚</div>
             <h3>Archivo de Conocimiento</h3>
             <p>Acceso a nuestra extensa base de datos sobre fenómenos paranormales, ubicaciones malditas y casos documentados.</p>
           </div>
-          <div className="service-card" onMouseEnter={playHover}>
+          <div className="service-card">
             <div className="service-icon">🎓</div>
             <h3>Capacitación</h3>
             <p>Obtén certificaciones en investigación paranormal, protocolo de campo y análisis de evidencia.</p>
           </div>
-          <div className="service-card" onMouseEnter={playHover}>
+          <div className="service-card">
             <div className="service-icon">👥</div>
             <h3>Red Global</h3>
             <p>Conecta con investigadores de todo el mundo, comparte hallazgos y colabora en proyectos especiales.</p>
           </div>
-          <div className="service-card" onMouseEnter={playHover}>
+          <div className="service-card">
             <div className="service-icon">🔐</div>
             <h3>Confidencialidad</h3>
             <p>Tus investigaciones están protegidas. Información clasificada permanece segura en nuestros archivos.</p>
@@ -274,11 +274,11 @@ export default function Informacion() {
       <footer className="info-footer">
         <p>© 1923-2026 Arkham Expeditions. Todos los derechos reservados.</p>
         <p className="info-footer-legal">
-          <span onClick={playClick} style={{ cursor: "pointer" }}>Términos de Servicio</span>
+          <span style={{ cursor: "pointer" }}>Términos de Servicio</span>
           {" • "}
-          <span onClick={playClick} style={{ cursor: "pointer" }}>Política de Privacidad</span>
+          <span style={{ cursor: "pointer" }}>Política de Privacidad</span>
           {" • "}
-          <span onClick={playClick} style={{ cursor: "pointer" }}>Aviso de Seguridad</span>
+          <span style={{ cursor: "pointer" }}>Aviso de Seguridad</span>
         </p>
       </footer>
     </div>

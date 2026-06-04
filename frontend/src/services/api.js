@@ -1,12 +1,10 @@
 import axios from "axios";
 
-const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const apiClient = axios.create({
   baseURL: API_BASE,
-  headers: {
-    "Content-Type": "application/json"
-  }
+  timeout: 8000
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -20,8 +18,8 @@ apiClient.interceptors.request.use((config) => {
       if (user.rol) {
         config.headers["x-arkham-role"] = user.rol;
       }
-    } catch (err) {
-      console.error("Error reading user data for auth headers", err);
+    } catch (e) {
+      // Ignore parse errors
     }
   }
   return config;
@@ -30,15 +28,12 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 403) {
-      console.warn("Access denied - insufficient permissions");
-    }
     if (error.response?.status === 401) {
       sessionStorage.removeItem("arkham_investigator");
-      window.location.href = "/";
     }
     return Promise.reject(error);
   }
 );
 
 export default apiClient;
+
