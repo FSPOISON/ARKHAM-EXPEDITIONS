@@ -94,20 +94,8 @@ function App() {
     }
   };
 
-  if (!API_BASE) {
-    return (
-      <div className="app fallback-bg">
-        <main className="container fallback-panel">
-          <h1 className="horror-title">ARKHAM EXPEDITIONS</h1>
-          <p className="error pulse">Señal de comunicación perdida.</p>
-          <p className="hint">Configura VITE_API_URL en el comunicador (frontend/.env).</p>
-        </main>
-      </div>
-    );
-  }
-
   if (!user) {
-    return <LoginPortal apiBase={API_BASE} onLoginSuccess={handleLoginSuccess} />;
+    return <LoginPortal onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
@@ -284,9 +272,9 @@ function App() {
           )}
         </header>
 
-        {tab === "usuarios" && <Usuarios apiBase={import.meta.env.VITE_API_URL || ""} onDataChange={loadMetrics} user={user} />}
-        {tab === "lugares" && <Lugares apiBase={import.meta.env.VITE_API_URL || ""} onDataChange={loadMetrics} user={user} />}
-        {tab === "expediciones" && <Expediciones apiBase={import.meta.env.VITE_API_URL || ""} user={user} onDataChange={loadMetrics} />}
+        {tab === "usuarios" && <Usuarios onDataChange={loadMetrics} user={user} />}
+        {tab === "lugares" && <Lugares onDataChange={loadMetrics} user={user} />}
+        {tab === "expediciones" && <Expediciones user={user} onDataChange={loadMetrics} />}
         {tab === "informacion" && <Informacion />}
       </main>
     </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import apiClient from "../services/api";
 import {
   playClick,
   playHover,
@@ -14,7 +14,7 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 const getErrorMessage = (err, fallback) =>
   err?.response?.data?.message || err?.message || fallback;
 
-export default function LoginPortal({ apiBase, onLoginSuccess }) {
+export default function LoginPortal({ onLoginSuccess }) {
   const [view, setView] = useState("login");
   const [soundActive, setSoundActive] = useState(isSoundEnabled());
   const [cargando, setCargando] = useState(false);
@@ -69,7 +69,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
     setOauthLoading(providerLabel);
     clearMessages();
     try {
-      const response = await axios.post(`${apiBase}/api/usuarios/oauth-login`, payload);
+      const response = await apiClient.post("/api/usuarios/oauth-login", payload);
       finishLogin(response.data);
     } catch (err) {
       playFailure();
@@ -78,7 +78,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
       setOauthLoading("");
       setCargando(false);
     }
-  }, [apiBase, finishLogin]);
+  }, [finishLogin]);
 
   useEffect(() => {
     if (!googleClientId) return;
@@ -164,7 +164,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
     }
     setCargando(true);
     try {
-      const response = await axios.post(`${apiBase}/api/usuarios/login`, {
+      const response = await apiClient.post("/api/usuarios/login", {
         email: loginEmail.trim(),
         contrasena: loginPassword
       });
@@ -187,7 +187,7 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
     }
     setCargando(true);
     try {
-      const response = await axios.post(`${apiBase}/api/usuarios/registrar`, {
+      const response = await apiClient.post("/api/usuarios/registrar", {
         nombre: regNombre.trim(),
         apellido: regApellido.trim(),
         email: regEmail.trim(),
