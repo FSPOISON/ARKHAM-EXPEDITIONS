@@ -1,13 +1,13 @@
 import { useCallback, useState, useEffect } from "react";
-import axios from "axios";
+import apiClient from "./services/api";
 import Usuarios from "./components/Usuarios";
 import Lugares from "./components/Lugares";
 import Expediciones from "./components/Expediciones";
+import Informacion from "./components/Informacion";
 import LoginPortal from "./components/LoginPortal";
 import { playClick, playHover, playTransition, toggleSound, isSoundEnabled } from "./utils/audioHelper";
 import "./App.css";
 
-const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 const monsterAvatar = (user) => {
   const seed = encodeURIComponent(user?.email || `${user?.nombre || "arkham"}-${user?.apellido || "agent"}`);
@@ -38,16 +38,16 @@ function App() {
   const loadMetrics = useCallback(async () => {
     try {
       const [uRes, lRes, eRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/usuarios`),
-        axios.get(`${API_BASE}/api/lugares`),
-        axios.get(`${API_BASE}/api/expediciones`)
+        apiClient.get("/api/usuarios"),
+        apiClient.get("/api/lugares"),
+        apiClient.get("/api/expediciones")
       ]);
       const uData = Array.isArray(uRes.data) ? uRes.data : [];
       const lData = Array.isArray(lRes.data) ? lRes.data : [];
       const eData = Array.isArray(eRes.data) ? eRes.data : [];
-      
-      const avg = lData.length > 0 
-        ? lData.reduce((acc, curr) => acc + (Number(curr.nivel_peligro) || 0), 0) / lData.length 
+
+      const avg = lData.length > 0
+        ? lData.reduce((acc, curr) => acc + (Number(curr.nivel_peligro) || 0), 0) / lData.length
         : 0;
 
       setMetrics({
@@ -138,13 +138,21 @@ function App() {
             <span className="nav-icon">👁️</span>
             Ubicaciones Oscuras
           </button>
-          <button 
+          <button
             className={`nav-btn ${tab === 'expediciones' ? 'active' : ''}`}
             onClick={() => handleTabChange('expediciones')}
             onMouseEnter={playHover}
           >
             <span className="nav-icon">🗺️</span>
             Expediciones
+          </button>
+          <button
+            className={`nav-btn ${tab === 'informacion' ? 'active' : ''}`}
+            onClick={() => handleTabChange('informacion')}
+            onMouseEnter={playHover}
+          >
+            <span className="nav-icon">ℹ️</span>
+            Información
           </button>
         </nav>
 
@@ -161,9 +169,14 @@ function App() {
           </div>
           <div className="sidebar-profile-info">
             <p className="sidebar-profile-name">{user.nombre} {user.apellido}</p>
-            <p className="sidebar-profile-role">
-              {user.nivel_explorador === 1 ? "🔰 Novicio" : "⚔️ Explorador"}
-            </p>
+            <div className="sidebar-profile-role-container">
+              <p className="sidebar-profile-role">
+                {user.rol === "admin" ? "⚔️ Administrador" : "🔰 Investigador"}
+              </p>
+              {user.rol === "admin" && (
+                <span className="admin-badge" title="Modo administrador activado">ADMIN</span>
+              )}
+            </div>
             <div className="sidebar-profile-stats">
               <span>⭐ {user.reputacion || 0}</span>
               <span>Lv.{user.nivel_explorador || 1}</span>
@@ -212,56 +225,69 @@ function App() {
         {/* Cabecera del Dashboard Profesional */}
         <header className="dashboard-header animate-slide-right">
           <div className="header-title-area">
-            <h2>Centro de Control de Investigaciones</h2>
-            <p className="welcome-text">Agente activo: <strong>{user.nombre} {user.apellido}</strong> — Monitoreando portales y expediciones.</p>
+            <h2>
+              {tab === "usuarios" && "Centro de Control de Investigaciones"}
+              {tab === "lugares" && "Catálogo de Ubicaciones Oscuras"}
+              {tab === "expediciones" && "Portal de Expediciones"}
+              {tab === "informacion" && "Acerca de Arkham Expeditions"}
+            </h2>
+            <p className="welcome-text">
+              {tab === "informacion"
+                ? "Descubre más sobre nuestra agencia y los servicios que ofrecemos."
+                : `Agente activo: ${user.nombre} ${user.apellido} — Monitoreando portales y expediciones.`
+              }
+            </p>
           </div>
 
-          <div className="metrics-grid">
-            <div className="metric-card" onMouseEnter={playHover}>
-              <div className="metric-card-inner">
-                <span className="metric-icon">👥</span>
-                <div className="metric-text-group">
-                  <div className="metric-val">{metrics.investigatorsCount}</div>
-                  <div className="metric-label">Investigadores</div>
+          {tab !== "informacion" && (
+            <div className="metrics-grid">
+              <div className="metric-card" onMouseEnter={playHover}>
+                <div className="metric-card-inner">
+                  <span className="metric-icon">👥</span>
+                  <div className="metric-text-group">
+                    <div className="metric-val">{metrics.investigatorsCount}</div>
+                    <div className="metric-label">Investigadores</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="metric-card" onMouseEnter={playHover}>
-              <div className="metric-card-inner">
-                <span className="metric-icon">👁️</span>
-                <div className="metric-text-group">
-                  <div className="metric-val">{metrics.locationsCount}</div>
-                  <div className="metric-label">Lugares Malditos</div>
+              <div className="metric-card" onMouseEnter={playHover}>
+                <div className="metric-card-inner">
+                  <span className="metric-icon">👁️</span>
+                  <div className="metric-text-group">
+                    <div className="metric-val">{metrics.locationsCount}</div>
+                    <div className="metric-label">Lugares Malditos</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="metric-card" onMouseEnter={playHover}>
-              <div className="metric-card-inner">
-                <span className="metric-icon">🗺️</span>
-                <div className="metric-text-group">
-                  <div className="metric-val">{metrics.expeditionsCount}</div>
-                  <div className="metric-label">Expediciones</div>
+              <div className="metric-card" onMouseEnter={playHover}>
+                <div className="metric-card-inner">
+                  <span className="metric-icon">🗺️</span>
+                  <div className="metric-text-group">
+                    <div className="metric-val">{metrics.expeditionsCount}</div>
+                    <div className="metric-label">Expediciones</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="metric-card" onMouseEnter={playHover}>
-              <div className="metric-card-inner">
-                <span className="metric-icon">⚠️</span>
-                <div className="metric-text-group">
-                  <div className="metric-val">{metrics.avgHazard.toFixed(1)}</div>
-                  <div className="metric-label">Riesgo Promedio</div>
+              <div className="metric-card" onMouseEnter={playHover}>
+                <div className="metric-card-inner">
+                  <span className="metric-icon">⚠️</span>
+                  <div className="metric-text-group">
+                    <div className="metric-val">{metrics.avgHazard.toFixed(1)}</div>
+                    <div className="metric-label">Riesgo Promedio</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </header>
 
-        {tab === "usuarios" && <Usuarios apiBase={API_BASE} onDataChange={loadMetrics} />}
-        {tab === "lugares" && <Lugares apiBase={API_BASE} onDataChange={loadMetrics} />}
-        {tab === "expediciones" && <Expediciones apiBase={API_BASE} user={user} onDataChange={loadMetrics} />}
+        {tab === "usuarios" && <Usuarios apiBase={import.meta.env.VITE_API_URL || ""} onDataChange={loadMetrics} user={user} />}
+        {tab === "lugares" && <Lugares apiBase={import.meta.env.VITE_API_URL || ""} onDataChange={loadMetrics} user={user} />}
+        {tab === "expediciones" && <Expediciones apiBase={import.meta.env.VITE_API_URL || ""} user={user} onDataChange={loadMetrics} />}
+        {tab === "informacion" && <Informacion />}
       </main>
     </div>
   );

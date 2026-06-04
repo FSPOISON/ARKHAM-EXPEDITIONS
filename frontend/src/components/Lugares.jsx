@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import apiClient from "../services/api";
 import { playClick, playHover } from "../utils/audioHelper";
 
 const emptyForm = { nombre: "", direccion: "", descripcion: "", nivel_peligro: "" };
@@ -12,8 +12,8 @@ const getRiskMeta = (level) => {
   return { className: "extreme", label: "Crítico", detail: `${lvl}/10`, value: lvl };
 };
 
-export default function Lugares({ apiBase, onDataChange }) {
-  const API_URL = `${apiBase}/api/lugares`;
+export default function Lugares({ apiBase, onDataChange, user }) {
+  const API_URL = "/api/lugares";
   const [lugares, setLugares] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -26,14 +26,14 @@ export default function Lugares({ apiBase, onDataChange }) {
     setCargando(true);
     setError("");
     try {
-      const { data } = await axios.get(API_URL);
+      const { data } = await apiClient.get(API_URL);
       setLugares(Array.isArray(data) ? data : []);
     } catch {
       setError("Error al cargar ubicaciones malditas.");
     } finally {
       setCargando(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     Promise.resolve().then(cargar);
@@ -80,10 +80,10 @@ export default function Lugares({ apiBase, onDataChange }) {
 
     try {
       if (editId) {
-        await axios.put(`${API_URL}/${editId}`, payload);
+        await apiClient.put(`${API_URL}/${editId}`, payload);
         setMensaje("Ubicación actualizada en los archivos.");
       } else {
-        await axios.post(API_URL, payload);
+        await apiClient.post(API_URL, payload);
         setMensaje("Nueva ubicación maldita registrada.");
       }
       setForm(emptyForm);
@@ -107,7 +107,7 @@ export default function Lugares({ apiBase, onDataChange }) {
     setMensaje("");
     setError("");
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await apiClient.delete(`${API_URL}/${id}`);
       setMensaje("Lugar borrado de la memoria.");
       if (editId === id) {
         setForm(emptyForm);

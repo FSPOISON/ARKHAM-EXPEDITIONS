@@ -56,8 +56,12 @@ export default function LoginPortal({ apiBase, onLoginSuccess }) {
 
   const finishLogin = useCallback((usuario) => {
     playSuccess();
-    sessionStorage.setItem("arkham_investigator", JSON.stringify(usuario));
-    onLoginSuccess(usuario);
+    const userWithDefaults = {
+      ...usuario,
+      rol: usuario.rol || "investigador"
+    };
+    sessionStorage.setItem("arkham_investigator", JSON.stringify(userWithDefaults));
+    onLoginSuccess(userWithDefaults);
   }, [onLoginSuccess]);
 
   const executeOAuthLogin = useCallback(async (payload, providerLabel) => {

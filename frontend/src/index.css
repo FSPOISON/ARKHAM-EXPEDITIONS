@@ -5,27 +5,35 @@
   --bg-dark: #0f172a;
   --bg-panel: #1e293b;
   --bg-input: #0f172a;
-  
+
   --border-color: #334155;
   --border-focus: #10b981;
-  
+
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  
+
   --accent-primary: #10b981;
   --accent-hover: #059669;
-  
+  --accent-gold: #d97706;
+  --accent-gold-hover: #b45309;
+
   --danger: #ef4444;
   --danger-hover: #dc2626;
-  
+  --warning: #f97316;
+  --warning-hover: #ea580c;
+  --success: #10b981;
+  --info: #3b82f6;
+
   --font-title: 'Cinzel', serif;
   --font-body: 'Inter', sans-serif;
-  
+
   --radius-lg: 16px;
   --radius-md: 8px;
   --radius-sm: 6px;
-  
+
   --shadow-panel: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
 * {

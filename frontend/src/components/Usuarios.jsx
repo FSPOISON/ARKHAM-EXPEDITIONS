@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import apiClient from "../services/api";
 import { playClick, playHover } from "../utils/audioHelper";
 
 const emptyForm = { nombre: "", apellido: "", email: "", telefono: "" };
@@ -15,8 +15,8 @@ const getCreatureProfile = (user) => {
   };
 };
 
-export default function Usuarios({ apiBase, onDataChange }) {
-  const API_URL = `${apiBase}/api/usuarios`;
+export default function Usuarios({ apiBase, onDataChange, user }) {
+  const API_URL = "/api/usuarios";
   const [usuarios, setUsuarios] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -29,14 +29,14 @@ export default function Usuarios({ apiBase, onDataChange }) {
     setCargando(true);
     setError("");
     try {
-      const { data } = await axios.get(API_URL);
+      const { data } = await apiClient.get(API_URL);
       setUsuarios(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err?.response?.data?.message || "Error al cargar investigadores.");
     } finally {
       setCargando(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     Promise.resolve().then(cargarUsuarios);
@@ -53,6 +53,10 @@ export default function Usuarios({ apiBase, onDataChange }) {
     );
   }, [usuarios, busqueda]);
 
+  const canManageUser = (targetId) => {
+    return user?.rol === "admin" || user?.id_usuario === targetId;
+  };
+
   const guardar = async (e) => {
     e.preventDefault();
     playClick();
@@ -64,10 +68,16 @@ export default function Usuarios({ apiBase, onDataChange }) {
     const payload = { ...form };
     try {
       if (editId) {
-        await axios.put(`${API_URL}/${editId}`, payload);
+        if (!canManageUser(editId)) {
+          return setError("No tienes permiso para modificar este investigador.");
+        }
+        await apiClient.put(`${API_URL}/${editId}`, payload);
         setMensaje("Investigador actualizado.");
       } else {
-        await axios.post(API_URL, payload);
+        if (user?.rol !== "admin") {
+          return setError("Solo administradores pueden reclutar nuevos investigadores.");
+        }
+        await apiClient.post(API_URL, payload);
         setMensaje("Nuevo investigador reclutado.");
       }
       setForm(emptyForm);
@@ -81,11 +91,15 @@ export default function Usuarios({ apiBase, onDataChange }) {
 
   const eliminar = async (id) => {
     playClick();
+    if (!canManageUser(id)) {
+      setError("No tienes permiso para eliminar este investigador.");
+      return;
+    }
     if (!window.confirm("¿Desterrar a este investigador permanentemente?")) return;
     setMensaje("");
     setError("");
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await apiClient.delete(`${API_URL}/${id}`);
       setMensaje("Investigador desterrado.");
       if (editId === id) {
         setForm(emptyForm);
@@ -110,11 +124,12 @@ export default function Usuarios({ apiBase, onDataChange }) {
       <div className="crud-grid">
         {/* Left Column: Form Card */}
         <div className="form-card-column animate-slide-right">
-          <div className="form-panel investigator-form-panel">
-            <div className="panel-kicker">Expediente confidencial</div>
-            <h3>{editId ? "Modificar Expediente" : "Reclutar Investigador"}</h3>
-            <p className="form-desc-text">Completa los datos del nuevo miembro del club.</p>
-            <form onSubmit={guardar}>
+          {user?.rol === "admin" || editId ? (
+            <div className="form-panel investigator-form-panel">
+              <div className="panel-kicker">Expediente confidencial</div>
+              <h3>{editId ? "Modificar Expediente" : "Reclutar Investigador"}</h3>
+              <p className="form-desc-text">Completa los datos del nuevo miembro del club.</p>
+              <form onSubmit={guardar}>
               <div className="input-group">
                 <input
                   name="nombre"
@@ -176,7 +191,16 @@ export default function Usuarios({ apiBase, onDataChange }) {
                 )}
               </div>
             </form>
-          </div>
+            </div>
+          ) : (
+            <div className="form-panel investigator-form-panel no-permission">
+              <div className="panel-kicker">Permisos Limitados</div>
+              <p className="form-desc-text">
+                Solo los administradores pueden reclutar nuevos investigadores.
+                Contacta con el equipo directivo si deseas añadir miembros.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Table Card */}
@@ -216,6 +240,7 @@ export default function Usuarios({ apiBase, onDataChange }) {
                   <tr>
                     <th>Investigador</th>
                     <th>Email</th>
+                    <th>Rol</th>
                     <th>Teléfono</th>
                     <th>Acciones</th>
                   </tr>
@@ -223,13 +248,14 @@ export default function Usuarios({ apiBase, onDataChange }) {
                 <tbody>
                   {usuariosFiltrados.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="empty">
+                      <td colSpan="5" className="empty">
                         El abismo está vacío. No hay investigadores registrados.
                       </td>
                     </tr>
                   ) : (
                     usuariosFiltrados.map((u) => {
                       const creature = getCreatureProfile(u);
+                      const canManage = canManageUser(u.id_usuario);
 
                       return (
                       <tr key={u.id_usuario} className="table-row-animate">
@@ -254,25 +280,36 @@ export default function Usuarios({ apiBase, onDataChange }) {
                           </div>
                         </td>
                         <td className="muted-cell">{u.email}</td>
+                        <td className="muted-cell">
+                          <span className={`role-badge ${u.rol === "admin" ? "role-admin" : "role-investigador"}`}>
+                            {u.rol === "admin" ? "⚔️ Admin" : "🔰 Investigador"}
+                          </span>
+                        </td>
                         <td className="muted-cell">{u.telefono || "Sin registrar"}</td>
                         <td className="row-actions">
                           <button
                             type="button"
-                            className="btn-secondary action-btn"
+                            className={`btn-secondary action-btn ${!canManage ? "disabled" : ""}`}
                             onClick={() => {
-                              playClick();
-                              setEditId(u.id_usuario);
-                              setForm(u);
+                              if (canManage) {
+                                playClick();
+                                setEditId(u.id_usuario);
+                                setForm(u);
+                              }
                             }}
-                            onMouseEnter={playHover}
+                            onMouseEnter={canManage ? playHover : null}
+                            disabled={!canManage}
+                            title={!canManage ? "Sin permisos para modificar este usuario" : "Modificar este investigador"}
                           >
                             Modificar
                           </button>
                           <button
                             type="button"
-                            className="btn-danger action-btn"
-                            onClick={() => eliminar(u.id_usuario)}
-                            onMouseEnter={playHover}
+                            className={`btn-danger action-btn ${!canManage ? "disabled" : ""}`}
+                            onClick={() => canManage && eliminar(u.id_usuario)}
+                            onMouseEnter={canManage ? playHover : null}
+                            disabled={!canManage}
+                            title={!canManage ? "Sin permisos para eliminar este usuario" : "Desterrar este investigador"}
                           >
                             Desterrar
                           </button>

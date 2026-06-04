@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import apiClient from "../services/api";
 
 const emptyForm = {
   titulo: "",
@@ -129,9 +129,9 @@ const buildReadiness = (expedition) => {
 };
 
 export default function Expediciones({ apiBase, user, onDataChange }) {
-  const API_URL = `${apiBase}/api/expediciones`;
-  const LUGARES_URL = `${apiBase}/api/lugares`;
-  const PAGOS_URL = `${apiBase}/api/pagos`;
+  const API_URL = "/api/expediciones";
+  const LUGARES_URL = "/api/lugares";
+  const PAGOS_URL = "/api/pagos";
 
   const [expediciones, setExpediciones] = useState([]);
   const [lugares, setLugares] = useState([]);
@@ -153,8 +153,8 @@ export default function Expediciones({ apiBase, user, onDataChange }) {
     setError("");
     try {
       const [expRes, lugRes] = await Promise.all([
-        axios.get(API_URL),
-        axios.get(LUGARES_URL)
+        apiClient.get(API_URL),
+        apiClient.get(LUGARES_URL)
       ]);
       setExpediciones(Array.isArray(expRes.data) ? expRes.data : []);
       setLugares(Array.isArray(lugRes.data) ? lugRes.data : []);
@@ -163,17 +163,17 @@ export default function Expediciones({ apiBase, user, onDataChange }) {
     } finally {
       setCargando(false);
     }
-  }, [API_URL, LUGARES_URL]);
+  }, []);
 
   const cargarPagos = useCallback(async () => {
     try {
-      const { data } = await axios.get(PAGOS_URL);
+      const { data } = await apiClient.get(PAGOS_URL);
       const remotePayments = Array.isArray(data) ? data : [];
       setPagos([...readLocalPayments(), ...remotePayments]);
     } catch {
       setPagos(readLocalPayments());
     }
-  }, [PAGOS_URL]);
+  }, []);
 
   useEffect(() => {
     Promise.resolve().then(async () => {
@@ -260,10 +260,10 @@ export default function Expediciones({ apiBase, user, onDataChange }) {
 
     try {
       if (editId) {
-        await axios.put(`${API_URL}/${editId}`, form);
+        await apiClient.put(`${API_URL}/${editId}`, form);
         setMensaje("Expedición internacional actualizada.");
       } else {
-        await axios.post(API_URL, form);
+        await apiClient.post(API_URL, form);
         setMensaje("Expedición internacional programada.");
       }
       setForm(emptyForm);
@@ -280,7 +280,7 @@ export default function Expediciones({ apiBase, user, onDataChange }) {
     setMensaje("");
     setError("");
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await apiClient.delete(`${API_URL}/${id}`);
       setMensaje("Expedición cancelada.");
       if (editId === id) {
         setForm(emptyForm);
@@ -376,7 +376,7 @@ export default function Expediciones({ apiBase, user, onDataChange }) {
 
     setProcesandoPago(true);
     try {
-      const { data } = await axios.post(`${PAGOS_URL}/checkout`, {
+      const { data } = await apiClient.post(`${PAGOS_URL}/checkout`, {
         id_usuario: user?.id_usuario,
         id_expedicion: checkoutExpedition.id_expedicion,
         cantidad: checkoutSummary.qty,
